@@ -15,16 +15,15 @@ https://docs.google.com/document/d/1VCM1yOlSXhzatvEgNLB1IoWqT81NWjPtbGr0THJ5uqE/
 ## Run the code
 
 
-### 5) Export Evaluating the repeatability on HPatches
+### 6) Export and Evaluate repeatability on SIFT
 #### Export
 ```
-python export2.py <export task> <config file> <export folder>
-# python3 export2.py export_descriptor configs/magicpoint_repeatability_heatmap.yaml $export_folder
+python export_classical.py export_descriptor configs/classical_descriptors.yaml sift_test
 ```
 #### evaluate
 ```
 python evaluation.py <path to npz files> [-r, --repeatibility | -o, --outputImg | -homo, --homography ]
-python evaluation.py logs/superpoint_hpatches_test/predictions -r -o
+python evaluation.py logs/sift_test/predictions -r -o
 ```
 - specify the pretrained model
 

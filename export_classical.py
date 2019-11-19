@@ -13,11 +13,12 @@ from tqdm import tqdm
 from tensorboardX import SummaryWriter
 
 from utils.utils import tensor2array, save_checkpoint, load_checkpoint, save_path_formatter
-from settings import EXPER_PATH
+# from settings import EXPER_PATH
+EXPER_PATH = 'logs'
 from utils.loader import dataLoader, modelLoader, pretrainedLoader
 from utils.utils import getWriterPath
 
-from utils.logging import *
+# from utils.logging import *
 
 
 def export_descriptor(config, output_dir, args):
