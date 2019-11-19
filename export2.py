@@ -162,6 +162,7 @@ def export_descriptor(config, output_dir, args):
             'warped_prob' (keypoints): np (N2, 2)
             'warped_desc': np (N2, 256)
             'homography': np (3,3)
+            'matches': np (N3, 4)
 
         '''
         # clean last descriptor

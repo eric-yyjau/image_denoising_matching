@@ -29,6 +29,9 @@ class PatchesDataset(object):
     }
 
     def __init__(self, transform=None, **config):
+        from utils.photometric import ImgAugTransform
+        self.ImgAugTransform = ImgAugTransform
+
         self.config = self.default_config
         self.config = dict_update(self.config, config)
         self.files = self._init_dataset(**self.config)
@@ -38,6 +41,8 @@ class PatchesDataset(object):
             sequence_set.append(sample)
         self.samples = sequence_set
         self.transform = transform
+        self.enable_photo = self.config['augmentation']['photometric']['enable']
+
         if config['preprocessing']['resize']:
             self.sizer = np.array(config['preprocessing']['resize'])
         pass
@@ -54,17 +59,19 @@ class PatchesDataset(object):
         """
         def _read_image(path):
             input_image = cv2.imread(path)
-            return input_image
-
-        def _preprocess(image):
+            image = input_image
             s = max(self.sizer /image.shape[:2])
             image = cv2.cvtColor(image, cv2.COLOR_RGB2GRAY)
             image = image[:int(self.sizer[0]/s),:int(self.sizer[1]/s)]
             image = cv2.resize(image, (self.sizer[1], self.sizer[0]),
                                      interpolation=cv2.INTER_AREA)
             image = image.astype('float32') / 255.0
-            if image.ndim == 2:
-                image = image[:,:, np.newaxis]
+            return image
+            # return input_image
+
+        def _preprocess(image):
+            # if image.ndim == 2:
+            #     image = image[:,:, np.newaxis]
             if self.transform is not None:
                 image = self.transform(image)
             return image
@@ -86,10 +93,34 @@ class PatchesDataset(object):
             # H = tf.matmul(up_scale, tf.matmul(H, down_scale))
             H = H*mat
             return H
+
+        def imgPhotometric(img):
+            """
+            :param img:
+                numpy (H, W)
+            :return:
+            """
+            augmentation = self.ImgAugTransform(**self.config['augmentation'])
+            img = img[:,:,np.newaxis]
+            img = augmentation(img)
+            # cusAug = self.customizedTransform()
+            # img = cusAug(img, **self.config['augmentation'])
+            return img
+
         sample = self.samples[index]
         image_original = _read_image(sample['image'])
-        image = _preprocess(image_original)
-        warped_image = _preprocess(_read_image(sample['warped_image']))
+        image = image_original
+        warped_image = _read_image(sample['warped_image'])
+        ## add augmentation
+        if self.enable_photo:
+            # print(f"image: {image.shape}")
+            image = imgPhotometric(image)
+            # print(f"warped_image: {warped_image.shape}")
+            warped_image = imgPhotometric(warped_image)
+
+        image = _preprocess(image)
+        warped_image = _preprocess(warped_image)
+
         to_numpy = False
         if to_numpy:
             image, warped_image = np.array(image), np.array(warped_image)

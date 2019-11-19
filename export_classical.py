@@ -17,7 +17,7 @@ from utils.utils import tensor2array, save_checkpoint, load_checkpoint, save_pat
 EXPER_PATH = 'logs'
 from utils.loader import dataLoader, modelLoader, pretrainedLoader
 from utils.utils import getWriterPath
-
+import cv2
 # from utils.logging import *
 
 
@@ -73,7 +73,10 @@ def export_descriptor(config, output_dir, args):
 
     # for sample in tqdm(enumerate(test_loader)):
     for i, sample in tqdm(enumerate(test_loader)):
-
+        if config["training"]["val_batches"] != -1 and (
+            i > config["training"]["val_batches"]
+        ):  ##### check: how to limit the validation
+            break
         img_0, img_1 = sample['image'], sample['warped_image']
 
         # first image, no matches
@@ -100,7 +103,9 @@ def export_descriptor(config, output_dir, args):
             print("desc shape: ", desc.shape)
             return pnts, desc
 
-        pts, desc = classicalDetectors(img, method=method)
+        pts_list = []
+        pts, desc_1 = classicalDetectors(img, method=method)
+        pts_list.append(pts)
         print("total points: ", pts.shape)
         '''
         pts: list [numpy (N, 2)]
@@ -109,12 +114,13 @@ def export_descriptor(config, output_dir, args):
         # save keypoints
         pred = {'image': squeezeToNumpy(img_0)}
         pred.update({'prob': pts,
-                     'desc': desc})
+                     'desc': desc_1})
 
         # second image, output matches
         img = img_1.numpy().squeeze()*255
         pred.update({'warped_image': squeezeToNumpy(img_1)})
-        pts, desc = classicalDetectors(img, method=method)
+        pts, desc_2 = classicalDetectors(img, method=method)
+        pts_list.append(pts)
 
         # if outputMatches == True:
         #     tracker.update(pts, desc)
@@ -122,9 +128,19 @@ def export_descriptor(config, output_dir, args):
 
         print("total points: ", pts.shape)
         pred.update({'warped_prob': pts,
-                     'warped_desc': desc,
+                     'warped_desc': desc_2,
                      'homography': squeezeToNumpy(sample['homography'])
                      })
+
+        ## get matches
+        data = get_sift_match(sift_kps_ii=pts_list[0], sift_des_ii=desc_1, sift_kps_jj=pts_list[1], sift_des_jj=desc_2, if_BF_matcher=True)
+        matches = data['match_quality_good']
+        print(f"matches: {matches.shape}")
+        matches_all = data['match_quality_all']
+        pred.update({
+            'matches': matches,
+            'matches_all': matches_all
+        })
         # clean last descriptor
         '''
         pred:
@@ -135,6 +151,7 @@ def export_descriptor(config, output_dir, args):
             'warped_prob' (keypoints): np (N2, 2)
             'warped_desc': np (N2, 256)
             'homography': np (3,3)
+            'matches': np (N3, 4)
 
         '''
 
@@ -150,6 +167,73 @@ def export_descriptor(config, output_dir, args):
         myfile.write("output pairs: " + str(count) + '\n')
     pass
 
+def get_sift_match(sift_kps_ii, sift_des_ii, sift_kps_jj, sift_des_jj, if_BF_matcher=True):
+    # select which kind of matcher
+    if (
+        if_BF_matcher
+    ):  # OpenCV sift matcher must be created inside each thread (because it does not support sharing across threads!)
+        bf = cv2.BFMatcher(normType=cv2.NORM_L2)
+        sift_matcher = bf
+    else:
+        FLANN_INDEX_KDTREE = 0
+        index_params = dict(algorithm=FLANN_INDEX_KDTREE, trees=5)
+        search_params = dict(checks=50)
+        flann = cv2.FlannBasedMatcher(index_params, search_params)
+        sift_matcher = flann
+
+    all_ij, good_ij, quality_good, quality_all = get_sift_match_idx_pair(
+        sift_matcher, sift_des_ii.copy(), sift_des_jj.copy()
+    )
+    if all_ij is None:
+        logging.warning(
+            "KNN match failed dumping %s frame %d-%d. Skipping" % (dump_dir, ii, jj)
+        )
+    # dump_ij_idx_file = dump_dir / "ij_idx_{}-{}".format(ii, jj)
+    # dump_ij_quality_file = dump_dir / "ij_quality_{}-{}".format(ii, jj)
+    # dump_ij_match_quality_file = dump_dir / "ij_match_quality_{}-{}".format(ii, jj)
+
+    # print(good_ij, good_ij.shape)
+    match_quality_good = np.hstack(
+        (sift_kps_ii[good_ij[:, 0]], sift_kps_jj[good_ij[:, 1]], quality_good)
+    )  # [[x1, y1, x2, y2, dist_good, ratio_good]]
+    match_quality_all = np.hstack(
+        (sift_kps_ii[all_ij[:, 0]], sift_kps_jj[all_ij[:, 1]], quality_all)
+    )  # [[x1, y1, x2, y2, dist_good, ratio_good]]
+    return {'match_quality_good': match_quality_good, 'match_quality_all': match_quality_all}
+
+
+
+def get_sift_match_idx_pair(sift_matcher, des1, des2):
+    """
+    do matchings, test the quality of matchings
+    """
+    try:
+        matches = sift_matcher.knnMatch(
+            des1, des2, k=2
+        )  # another option is https://github.com/MagicLeapResearch/SuperPointPretrainedNetwork/blob/master/demo_superpoint.py#L309
+    except Exception as e:
+        logging.error(traceback.format_exception(*sys.exc_info()))
+        return None, None
+    # store all the good matches as per Lowe's ratio test.
+    good = []
+    all_m = []
+    quality_good = []
+    quality_all = []
+    for m, n in matches:
+        all_m.append(m)
+        if m.distance < 0.8 * n.distance:
+            good.append(m)
+            quality_good.append([m.distance, m.distance / n.distance])
+        quality_all.append([m.distance, m.distance / n.distance])
+
+    good_ij = [[mat.queryIdx for mat in good], [mat.trainIdx for mat in good]]
+    all_ij = [[mat.queryIdx for mat in all_m], [mat.trainIdx for mat in all_m]]
+    return (
+        np.asarray(all_ij, dtype=np.int32).T.copy(),
+        np.asarray(good_ij, dtype=np.int32).T.copy(),
+        np.asarray(quality_good, dtype=np.float32).copy(),
+        np.asarray(quality_all, dtype=np.float32).copy(),
+    )
 
 
 if __name__ == '__main__':
