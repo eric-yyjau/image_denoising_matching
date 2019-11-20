@@ -96,47 +96,58 @@ class MultiBilateral():
         self.mode = mode
         
 
-    def denoise(self, img, d=50, sigmaColor=0.04, sigmaSpace=0.04):
+    def denoise(self, img, d=10, sigmaColor=0.3, sigmaSpace=1.8):
+        # channel first
+        img = img.transpose(2,0,1)
         # --- wavelet transform
-        original_extent = tuple(slice(s) for s in img.shape)
-        coeffs = pywt.wavedecn(img, wavelet = self.wavelet_type, 
+        coeffs = pywt.wavedec2(img, wavelet = self.wavelet_type, 
                                level = self.wavelet_levels)
         LP = coeffs[0]
         dcoeffs = coeffs[1:]
         
-        # --- denoise LP with bilateral
-#        LP_bilateral = LP
-#        for i in range(LP.shape[-1]):
-#            LP_bilateral[:,:,i] = cv2.bilateralFilter(np.float32(LP[:,:,i]), 
-#                        d, sigmaColor, sigmaSpace)
-        eps = 1e-4
-        LP_bilateral = denoise_bilateral(LP - LP.min()+eps, d, sigmaColor, sigmaSpace,
-                                         multichannel=True) + LP.min()
-                
-        # --- denoise HP with thresholding
         if self.sigma is None:
             # Estimate the noise via the method in [2]_
-            detail_coeffs = dcoeffs[-1]['d' * img.ndim]
+            detail_coeffs = dcoeffs[-1][-1]
             self.sigma = _sigma_est_dwt(detail_coeffs, distribution='Gaussian')
-            
         var = self.sigma**2
-        print(self.sigma)
         
-        if self.threshold_type == "BayesShrink":
-            threshold = [{key: _bayes_thresh(level[key], var) \
-                          for key in level} for level in dcoeffs]
-        #elif self.threshold_type == "VisuShrink":
-        else: # use BayesShrink
-            threshold = [{key: _bayes_thresh(level[key], var) \
-                          for key in level} for level in dcoeffs]
-        print(threshold)
-        denoised_detail = [{key: pywt.threshold(level[key],
-                                        value=thresh[key],
-                                        mode=self.mode) for key in level} \
-                           for thresh, level in zip(threshold, dcoeffs)]
+        for l in range(self.wavelet_levels):
+            # --- denoise LP with bilateral
+            LP_bilateral = np.zeros_like(LP)
+            for i in range(LP.shape[0]):
+                LP_bilateral[i] = cv2.bilateralFilter(np.float32(LP[i]), 
+                            d, sigmaColor, sigmaSpace)
             
-        coeffs_rec = [LP_bilateral] + denoised_detail
-        img_out = pywt.waverecn(coeffs_rec, self.wavelet_type)[original_extent]
+    #        eps = 1e-4
+    #        LP_bilateral = denoise_bilateral(LP-LP.min()+eps, win_size = d, 
+    #                                         sigma_color = sigmaColor, 
+    #                                         sigma_spatial = sigmaSpace,
+    #                                         mode ='reflect',
+    #                                         multichannel=True) + LP.min()
+                    
+#            # --- denoise HP with thresholding
+            level = dcoeffs[l]
+            if self.threshold_type == "BayesShrink":
+                threshold = [ _bayes_thresh(channel, var) for channel in level]
+            #elif self.threshold_type == "VisuShrink":
+            else:
+                threshold = [ _bayes_thresh(channel, var) for channel in level]
+            denoised_detail = [pywt.threshold(channel, value=thres, mode=self.mode) \
+                               for thres, channel in zip(threshold,level)]
+#            print(LP_bilateral.shape)            
+#            print(denoised_detail[0].shape,denoised_detail[1].shape,denoised_detail[2].shape)
+            coeffs_rec = [LP_bilateral] + [denoised_detail]
+            LP = pywt.waverec2(coeffs_rec, self.wavelet_type)
+            
+#            denoised_detail = [{key: pywt.threshold(level[key],
+#                                            value=thresh[key],
+#                                            mode=self.mode) for key in level} \
+#                               for thresh, level in zip(threshold, dcoeffs)]
+#                
+#            coeffs_rec = [LP_bilateral] + denoised_detail
+#            img_out = pywt.waverecn(coeffs_rec, self.wavelet_type)
+        # channel last
+        img_out = LP.transpose(1,2,0)
         
         return img_out
         
@@ -144,24 +155,6 @@ class MultiBilateral():
 #    img_out = cv2.bilateralFilter(img, d, sigmaColor, sigmaSpace)    
 #    return img_out
         
-#%%
-def bilateral_lab(img, d, sigmaColor, sigmaSpace):
-    '''
-    Denoising operates in CIE-LAB domian
-    d - len 3: Diameter of each pixel neighborhood 
-    sigmaColor - len 3: Filter sigma in the color space
-    sigmaSpace - len 3: Filter sigma in the coordinate space
-    '''
-        
-    img_lab = cv2.cvtColor(img, cv2.COLOR_BGR2LAB)
-    bilateral_l = cv2.bilateralFilter(img_lab[:,:,0], d[0], sigmaColor[0], sigmaSpace[0])
-    bilateral_a = cv2.bilateralFilter(img_lab[:,:,1], d[1], sigmaColor[1], sigmaSpace[1])
-    bilateral_b = cv2.bilateralFilter(img_lab[:,:,2], d[2], sigmaColor[2], sigmaSpace[2])
-    bilateral = np.stack((bilateral_l,bilateral_a,bilateral_b),-1)
-    img_out = cv2.cvtColor(bilateral, cv2.COLOR_LAB2BGR)
-    
-    return img_out
-
 
 #%%
 if __name__ == '__main__':
@@ -169,20 +162,28 @@ if __name__ == '__main__':
 #    sigmaColor = [25,50,50]
 #    sigmaSpace = [25,50,50]
     
-#    d = 50
-#    sigmaColor = 75
-#    sigmaSpace = 75
+    d = 50
+    sigmaColor = 75
+    sigmaSpace = 75
+    
+#    from skimage import data, img_as_float
+#    from skimage.util import random_noise
+#    img_gt = img_as_float(data.chelsea()[100:250, 50:300])   
+#    sigma = 0.12
+#    img = random_noise(img_gt, var=sigma**2)
     
     img = np.float64(cv2.imread('../data/NOISY_SRGB_010_patch.png'))/255.
     img_gt = np.float64(cv2.imread('../data/GT_SRGB_010_patch.png'))/255.
 #    img_dn = bilateral_lab(img, d, sigmaColor, sigmaSpace)
-#    img_dn = cv2.bilateralFilter(img, d, sigmaColor, sigmaSpace)
+    img_bl = cv2.bilateralFilter(np.float32(img), d, sigmaColor/255, sigmaSpace)
     
     multi_bilateral = MultiBilateral()
     img_dn = multi_bilateral.denoise(img)
-    cv2.imshow('img_dn',img_dn)
-    cv2.imshow('img_gt',img_gt)
     cv2.imshow('img',img)
+    cv2.imshow('img_dn',img_dn)
+    cv2.imshow('img_bl',img_bl)
+    cv2.imshow('img_gt',img_gt)
     
     # B
     #cv2.imshow('img',img[:,:,0])
+    
