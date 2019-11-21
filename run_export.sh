@@ -1,7 +1,7 @@
 
 # export_folder='sift_hpatchesTestAll'
 # export_folder='sift_hpatches_shuf50'
-export_folder='sift_hpatches_shuf5'
+export_folder='bl_sift_hpatches_shuf2'
 echo $export_folder
 # python3 export2.py export_descriptor configs/hpatches_rep/magicpoint_repeatability_heatmap.yaml $export_folder
 # python3 export2.py export_descriptor configs/magicpoint_repeatability_heatmap.yaml $export_folder

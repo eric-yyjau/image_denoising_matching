@@ -64,10 +64,10 @@ def export_descriptor(config, output_dir, args):
     from utils.print_tool import datasize
     datasize(test_loader, config, tag='test')
 
-    if config["training"]["val_batches"] != -1:
+    if config["training"]["val_batches"] == -1:
         logging.info("export all")
     else:
-        logging.info(f"eval on {config["training"]["val_batches"]} samples")
+        logging.info(f'eval on {config["training"]["val_batches"]} samples')
 
     from imageio import imread
     def load_as_float(path):
@@ -90,13 +90,35 @@ def export_descriptor(config, output_dir, args):
             break
         img_0, img_1 = sample['image'], sample['warped_image']
 
+        def filter_before_matching(img, filter=None):
+            """
+            input: 
+                img: np.float[H, W, ..] (from 0 to 1)
+
+            """
+            from models.bilateral import bilateral
+            if filter is None: 
+                return img
+            elif filter == 'bilateral':
+                logging.info(f"using {filter} filter")
+                d = 50
+                sigmaColor = 75
+                sigmaSpace = 75                
+                img = bilateral(np.float32(img), d, sigmaColor/255, sigmaSpace)
+
+            return img
+        # img = img_0.numpy().squeeze()
         # first image, no matches
-        img = img_0.numpy().squeeze()*255
+        img = img_0.numpy().squeeze()
+        img = filter_before_matching(img, filter=config['model']['filter'])
+
+
         # H, W = img.shape[1], img.shape[2]
         # img = img.view(1,1,H,W)
 
         ##### add opencv functions here #####
         def classicalDetectors(image, method='sift'):
+            image = image*255
             round_method = False
             if round_method == True:
                 from models.classical_detectors_descriptors import classical_detector_descriptor # with quantization
@@ -128,7 +150,8 @@ def export_descriptor(config, output_dir, args):
                      'desc': desc_1})
 
         # second image, output matches
-        img = img_1.numpy().squeeze()*255
+        img = img_1.numpy().squeeze()
+        img = filter_before_matching(img, filter=config['model']['filter'])
         pred.update({'warped_image': squeezeToNumpy(img_1)})
         pts, desc_2 = classicalDetectors(img, method=method)
         pts_list.append(pts)

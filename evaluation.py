@@ -61,6 +61,7 @@ def evaluate(args, **options):
     path = args.path
     files = find_files_with_ext(path)
     correctness = []
+    est_H_mean_dist = []
     repeatability = []
     mscore = []
     mAP = []
@@ -150,6 +151,7 @@ def evaluate(args, **options):
             #####
             result = compute_homography(data, correctness_thresh=homography_thresh)
             correctness.append(result['correctness'])
+            est_H_mean_dist.append(result['mean_dist'])
             # compute matching score
             def warpLabels(pnts, homography, H, W):
                 import torch
@@ -323,8 +325,10 @@ def evaluate(args, **options):
         print("localization error over ", len(localization_err), " images : ", localization_err_m)
     if args.homography:
         correctness_ave = np.array(correctness).mean(axis=0)
+        est_H_mean_dist = np.array(est_H_mean_dist)
         print("homography estimation threshold", homography_thresh)
         print("correctness_ave", correctness_ave)
+        print(f"mean est H dist: {est_H_mean_dist.mean()}")
         mscore_m = np.array(mscore).mean(axis=0)
         print("matching score", mscore_m)
         if compute_map:
@@ -347,6 +351,9 @@ def evaluate(args, **options):
             myfile.write("Homography estimation: " + '\n')
             myfile.write("Homography threshold: " + str(homography_thresh) + '\n')
             myfile.write("Average correctness: " + str(correctness_ave) + '\n')
+
+            myfile.write("mean est H dist: " + str(est_H_mean_dist.mean()) + '\n')
+
             if compute_map:
                 myfile.write("nn mean AP: " + str(mAP_m) + '\n')
             myfile.write("matching score: " + str(mscore_m) + '\n')
@@ -376,6 +383,7 @@ def evaluate(args, **options):
         'homography_thresh': homography_thresh,
         'mscore': mscore,
         'mAP': np.array(mAP),
+        'est_H_mean_dist': est_H_mean_dist
     }
 
     filename = f'{save_file[:-4]}.npz'

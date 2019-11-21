@@ -149,7 +149,9 @@ def compute_homography(data, keep_k_points=1000, correctness_thresh=3, orb=False
             'cv2_matches': cv2_matches,
             'mscores': m_dist/(m_dist.max()), # normalized distance
             'inliers': inliers,
-            'homography': H}
+            'homography': H,
+            'mean_dist': mean_dist
+            }
 
 
 def homography_estimation(exper_name, keep_k_points=1000,

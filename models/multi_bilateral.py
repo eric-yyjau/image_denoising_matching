@@ -54,6 +54,7 @@ def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
     return sigma
 
 #%%
+# from models.multi_bilateral import MultiBilateral
 class MultiBilateral():
     """Perform wavelet thresholding.
     Parameters

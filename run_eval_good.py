@@ -34,8 +34,14 @@ class sequence_info(object):
             # config['training']['pretrained'] = pretrained
             # config['training']['pretrained_SP'] = pretrained_SP
         elif mode == 1:
+            config['data']['augmentation']['photometric']['enable'] = True
             assert config['data']['augmentation']['photometric']['enable'] == True
             config['data']['augmentation']['photometric']['params']['additive_gaussian_noise']['stddev_range'] = param
+        elif mode == 2:
+            config['data']['augmentation']['photometric']['enable'] = True
+            assert config['data']['augmentation']['photometric']['enable'] == True
+            config['data']['augmentation']['photometric']['params']['additive_gaussian_noise']['stddev_range'] = param
+            config['model']['filter'] = 'bilateral'
 
         if if_print and mode <= 5:
             logging.info(f"update params: {config['data']['augmentation']}")
@@ -70,10 +76,15 @@ class sequence_info(object):
 
         sift_sigma = {
             'sift_sig-1': ['sift_sig_', [5.0,5.0], 1],
-            'sift_sig-2': ['sift_sig_', [10.0,10.0], 1],
-            'sift_sig-3': ['sift_sig_', [15.0,15.0], 1],
-            'sift_sig-4': ['sift_sig_', [20.0,20.0], 1],
-            'sift_sig-5': ['sift_sig_', [25.0,25.0], 1],
+            # 'sift_sig-2': ['sift_sig_', [10.0,10.0], 1],
+
+            ## add filters
+            'sift_sig-11': ['bi_sift_sig_', [5.0,5.0], 2], # 'bilateral
+            'sift_sig-12': ['bi_sift_sig_', [10.0,10.0], 2], # bilateral
+
+            # 'sift_sig-3': ['sift_sig_', [15.0,15.0], 1],
+            # 'sift_sig-4': ['sift_sig_', [20.0,20.0], 1],
+            # 'sift_sig-5': ['sift_sig_', [25.0,25.0], 1],
             # 'sift_sig_1': ['sift_sig_v1_', [5.0,5.0], 1],
             # 'sift_sig_2': ['sift_sig_v2_', [5.0,5.0], 1],
         }
