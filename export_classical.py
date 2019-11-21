@@ -18,7 +18,7 @@ EXPER_PATH = 'logs'
 from utils.loader import dataLoader, modelLoader, pretrainedLoader
 from utils.utils import getWriterPath
 import cv2
-# from utils.logging import *
+from utils.logging import *
 
 
 def export_descriptor(config, output_dir, args):
@@ -39,6 +39,12 @@ def export_descriptor(config, output_dir, args):
         yaml.dump(config, f, default_flow_style=False)
     writer = SummaryWriter(getWriterPath(task=args.command, date=True))
 
+    if config["training"]["reproduce"]:
+        logging.info("reproduce = True")
+        torch.manual_seed(0)
+        np.random.seed(0)
+        print(f"test random # : np({np.random.rand(1)}), torch({torch.rand(1)})")
+
     ## save data
     from pathlib import Path
     # save_path = save_path_formatter(config, output_dir)
@@ -52,11 +58,16 @@ def export_descriptor(config, output_dir, args):
 
     # data loading
     from utils.loader import dataLoader_test as dataLoader
-    data = dataLoader(config, dataset='hpatches')
+    data = dataLoader(config, dataset='hpatches', shuffle=config['data']['shuffle'])
     test_set, test_loader = data['test_set'], data['test_loader']
 
     from utils.print_tool import datasize
     datasize(test_loader, config, tag='test')
+
+    if config["training"]["val_batches"] != -1:
+        logging.info("export all")
+    else:
+        logging.info(f"eval on {config["training"]["val_batches"]} samples")
 
     from imageio import imread
     def load_as_float(path):
@@ -181,7 +192,7 @@ def get_sift_match(sift_kps_ii, sift_des_ii, sift_kps_jj, sift_des_jj, if_BF_mat
         flann = cv2.FlannBasedMatcher(index_params, search_params)
         sift_matcher = flann
 
-    all_ij, good_ij, quality_good, quality_all = get_sift_match_idx_pair(
+    all_ij, good_ij, quality_good, quality_all, cv_matches = get_sift_match_idx_pair(
         sift_matcher, sift_des_ii.copy(), sift_des_jj.copy()
     )
     if all_ij is None:
@@ -199,7 +210,8 @@ def get_sift_match(sift_kps_ii, sift_des_ii, sift_kps_jj, sift_des_jj, if_BF_mat
     match_quality_all = np.hstack(
         (sift_kps_ii[all_ij[:, 0]], sift_kps_jj[all_ij[:, 1]], quality_all)
     )  # [[x1, y1, x2, y2, dist_good, ratio_good]]
-    return {'match_quality_good': match_quality_good, 'match_quality_all': match_quality_all}
+    return {'match_quality_good': match_quality_good, 
+    'match_quality_all': match_quality_all, 'cv_matches': cv_matches}
 
 
 
@@ -233,6 +245,7 @@ def get_sift_match_idx_pair(sift_matcher, des1, des2):
         np.asarray(good_ij, dtype=np.int32).T.copy(),
         np.asarray(quality_good, dtype=np.float32).copy(),
         np.asarray(quality_all, dtype=np.float32).copy(),
+        matches
     )
 
 

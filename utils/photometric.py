@@ -35,6 +35,7 @@ class ImgAugTransform:
             # if params['additive_gaussian_noise']:
             if params.get('additive_gaussian_noise', False):
                 change = params['additive_gaussian_noise']['stddev_range']
+                change = [float(c) for c in change]
                 aug = iaa.AdditiveGaussianNoise(scale=(change[0], change[1]))
                 aug_all.append(aug)
             # if params['additive_speckle_noise']:

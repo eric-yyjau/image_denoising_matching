@@ -5,19 +5,20 @@ data:
     cache_in_memory: false
     # validation_size: 100
 
+    shuffle: true
     preprocessing:
         resize: [240, 320]  # False for coco
         # resize: [480, 640]  # False for coco
     ### augmentation
     augmentation:
         photometric:
-            enable: true
-            # primitives: [
-            #     'additive_gaussian_noise'
-            # ]
+            enable: True
             primitives: [
-                'random_brightness', 'random_contrast', 'additive_speckle_noise',
-                'additive_gaussian_noise', 'additive_shade', 'motion_blur']
+                'additive_gaussian_noise'
+            ]
+            # primitives: [
+            #     'random_brightness', 'random_contrast', 'additive_speckle_noise',
+            #     'additive_gaussian_noise', 'additive_shade', 'motion_blur']
             params:
                 random_brightness: {max_abs_change: 50}
                 random_contrast: {strength_range: [0.5, 1.5]}
@@ -29,7 +30,8 @@ data:
                 motion_blur: {max_kernel_size: 3}
 
 training:
-    val_batches: 10 # batches of validation, batch = 1
+    val_batches: 50 # batches of validation, batch = 1
+    reproduce: true
 
 model:
     name: 'classical_detectors_descriptors'

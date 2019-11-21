@@ -114,7 +114,8 @@ def dataLoader(config, dataset='syn', warp_input=False, train=True, val=True):
     return {'train_loader': train_loader, 'val_loader': val_loader,
             'train_set': train_set, 'val_set': val_set}
 
-def dataLoader_test(config, dataset='syn', warp_input=False, export_task='train'):
+def dataLoader_test(config, dataset='syn', warp_input=False, export_task='train',
+            shuffle=False):
     import torchvision.transforms as transforms
     data_transforms = {
         'test': transforms.Compose([
@@ -141,7 +142,7 @@ def dataLoader_test(config, dataset='syn', warp_input=False, export_task='train'
             **config['data'],
         )
         test_loader = torch.utils.data.DataLoader(
-            test_set, batch_size=1, shuffle=False,
+            test_set, batch_size=1, shuffle=shuffle,
             pin_memory=True,
             num_workers=8,
             worker_init_fn=worker_init_fn
@@ -154,7 +155,7 @@ def dataLoader_test(config, dataset='syn', warp_input=False, export_task='train'
             **config['data'],
         )
         test_loader = torch.utils.data.DataLoader(
-            test_set, batch_size=1, shuffle=False,
+            test_set, batch_size=1, shuffle=shuffle,
             pin_memory=True,
             num_workers=8,
             worker_init_fn=worker_init_fn
@@ -170,7 +171,7 @@ def dataLoader_test(config, dataset='syn', warp_input=False, export_task='train'
             **config['data'],
         )
         test_loader = torch.utils.data.DataLoader(
-            test_set, batch_size=1, shuffle=False,
+            test_set, batch_size=1, shuffle=shuffle,
             pin_memory=True,
             num_workers=8,
             worker_init_fn=worker_init_fn

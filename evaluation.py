@@ -11,13 +11,14 @@ import logging
 import os
 from tqdm import tqdm
 from utils.draw import plot_imgs
+from utils.logging import *
 
-
-def draw_matches_cv(data):
+def draw_matches_cv(data, matches):
     keypoints1 = [cv2.KeyPoint(p[1], p[0], 1) for p in data['keypoints1']]
     keypoints2 = [cv2.KeyPoint(p[1], p[0], 1) for p in data['keypoints2']]
     inliers = data['inliers'].astype(bool)
-    matches = np.array(data['matches'])[inliers].tolist()
+    # matches = np.array(data['matches'])[inliers].tolist()
+    # matches = matches[inliers].tolist()
     def to3dim(img):
         if img.ndim == 2:
             img = img[:, :, np.newaxis]
@@ -29,7 +30,14 @@ def draw_matches_cv(data):
     return cv2.drawMatches(img1, keypoints1, img2, keypoints2, matches,
                            None, matchColor=(0,255,0), singlePointColor=(0, 0, 255))
 
-def find_files_with_ext(directory, extension='.npz'):
+def isfloat(value):
+  try:
+    float(value)
+    return True
+  except ValueError:
+    return False
+
+def find_files_with_ext(directory, extension='.npz', if_int=True):
     # print(os.listdir(directory))
     list_of_files = []
     import os
@@ -38,7 +46,9 @@ def find_files_with_ext(directory, extension='.npz'):
             if l.endswith(extension):
                 list_of_files.append(l)
                 # print(l)
-        return list_of_files
+    if if_int:
+        list_of_files = [e for e in list_of_files if isfloat(e[:-4])]
+    return list_of_files
 
 
 def to3dim(img):
@@ -63,6 +73,12 @@ def evaluate(args, **options):
     top_K = 1000
     print("top_K: ", top_K)
 
+    reproduce = True
+    if reproduce:
+        logging.info("reproduce = True")
+        np.random.seed(0)
+        print(f"test random # : np({np.random.rand(1)})")
+
 
     # create output dir
     if args.outputImg:
@@ -75,6 +91,7 @@ def evaluate(args, **options):
 
     # for i in range(2):
     #     f = files[i]
+    print(f"file: {files[0]}")
     files.sort(key=lambda x: int(x[:-4]))
     from numpy.linalg import norm
     from utils.draw import draw_keypoints
@@ -229,7 +246,9 @@ def evaluate(args, **options):
                 def flipArr(arr):
                     return arr.max() - arr
                 
-                matches, mscores = getMatches(data)
+                # matches, mscores = getMatches(data)
+                assert result is not None
+                matches, mscores = result['matches'], result['mscores']
                 real_H = data['homography']
                 if inliers_method == 'gt':
                     # use ground truth homography
@@ -240,7 +259,9 @@ def evaluate(args, **options):
                     print("use opencv estimation for inliers")
                     inliers = getInliers_cv(matches, real_H, epi=3, verbose=verbose)
                     
-                m_flip = flipArr(mscores[:,2])
+                # m_flip = flipArr(mscores[:,2])
+                ## distance to confidence
+                m_flip = flipArr(mscores[:])  # for sift
         
                 if inliers.shape[0] > 0 and inliers.sum()>0:
 #                     m_flip = flipArr(m_flip)
@@ -277,7 +298,7 @@ def evaluate(args, **options):
                 # draw matches
                 result['image1'] = image
                 result['image2'] = warped_image
-                img = draw_matches_cv(result)
+                img = draw_matches_cv(result, result['cv2_matches'])
                 # filename = "correspondence_visualization"
                 plot_imgs([img], titles=["Two images feature correspondences"], dpi=200)
                 plt.tight_layout()
@@ -286,7 +307,7 @@ def evaluate(args, **options):
                 # pltImshow(img)
 
         if args.plotMatching:
-            matches = data['matches']
+            matches = result['matches'] # np [N x 4]
             if matches.shape[0] > 0:
                 from utils.draw import draw_matches
                 filename = path_match + '/' + f_num + 'm.png'
@@ -347,6 +368,22 @@ def evaluate(args, **options):
                         myfile.write(":, mean AP: " + str(mAP[i]))
                 myfile.write('\n')
             myfile.write("======== end ========" + '\n')
+
+    dict_of_lists = {
+        'repeatability': repeatability,
+        'localization_err': localization_err,
+        'correctness': np.array(correctness),
+        'homography_thresh': homography_thresh,
+        'mscore': mscore,
+        'mAP': np.array(mAP),
+    }
+
+    filename = f'{save_file[:-4]}.npz'
+    logging.info(f"save file: {filename}")
+    np.savez(
+        filename,
+        **dict_of_lists,
+    )
 
 
 if __name__ == '__main__':
