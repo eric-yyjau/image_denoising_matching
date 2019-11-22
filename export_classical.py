@@ -101,7 +101,7 @@ def export_descriptor(config, output_dir, args):
                 return img
             elif filter == 'bilateral':
                 logging.info(f"using {filter} filter")
-                d = 50
+                d = 0  # use the settings for all noise levels
                 sigmaColor = 75
                 sigmaSpace = 75                
                 img = bilateral(np.float32(img), d, sigmaColor/255, sigmaSpace)
@@ -109,9 +109,15 @@ def export_descriptor(config, output_dir, args):
             return img
         # img = img_0.numpy().squeeze()
         # first image, no matches
+        imgs_np, imgs_fil = [], []
         img = img_0.numpy().squeeze()
+        imgs_np.append(img)
         img = filter_before_matching(img, filter=config['model']['filter'])
-
+        imgs_fil.append(img)
+        img = img_1.numpy().squeeze()
+        imgs_np.append(img)
+        img = filter_before_matching(img, filter=config['model']['filter'])
+        imgs_fil.append(img)
 
         # H, W = img.shape[1], img.shape[2]
         # img = img.view(1,1,H,W)
@@ -137,7 +143,7 @@ def export_descriptor(config, output_dir, args):
             return pnts, desc
 
         pts_list = []
-        pts, desc_1 = classicalDetectors(img, method=method)
+        pts, desc_1 = classicalDetectors(imgs_fil[0], method=method)
         pts_list.append(pts)
         print("total points: ", pts.shape)
         '''
@@ -145,15 +151,21 @@ def export_descriptor(config, output_dir, args):
         desc: list [numpy (N, 128)]
         '''
         # save keypoints
-        pred = {'image': squeezeToNumpy(img_0)}
+        pred = {}
+        pred.update({
+            'image_fil': imgs_fil[0],
+            'image': imgs_np[0],
+        })
         pred.update({'prob': pts,
                      'desc': desc_1})
 
         # second image, output matches
-        img = img_1.numpy().squeeze()
-        img = filter_before_matching(img, filter=config['model']['filter'])
-        pred.update({'warped_image': squeezeToNumpy(img_1)})
-        pts, desc_2 = classicalDetectors(img, method=method)
+
+        pred.update({
+            'warped_image': imgs_np[1],
+            'warped_image_fil': imgs_fil[1],
+        })
+        pts, desc_2 = classicalDetectors(imgs_fil[1], method=method)
         pts_list.append(pts)
 
         # if outputMatches == True:

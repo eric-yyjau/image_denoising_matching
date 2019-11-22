@@ -147,7 +147,7 @@ def evaluate(args, **options):
         if args.homography:
             # estimate result
             ##### check
-            homography_thresh = [1,3,5]
+            homography_thresh = [1,3,5,10,20,50]
             #####
             result = compute_homography(data, correctness_thresh=homography_thresh)
             correctness.append(result['correctness'])
@@ -295,6 +295,14 @@ def evaluate(args, **options):
                 plot_imgs([img1, img2, warped_img1], titles=['img1', 'img2', 'warped_img1'], dpi=200)
                 plt.tight_layout()
                 plt.savefig(path_warp + '/' + f_num + '.png')
+
+                ## plot filtered image
+                img1, img2 = data['image_fil'], data['warped_image_fil']
+                warped_img1 = cv2.warpPerspective(img1, H, (img2.shape[1], img2.shape[0]))
+                plot_imgs([img1, img2, warped_img1], titles=['img1', 'img2', 'warped_img1'], dpi=200)
+                plt.tight_layout()
+                plt.savefig(path_warp + '/' + f_num + '_fil.png')
+
                 # plt.show()
 
                 # draw matches

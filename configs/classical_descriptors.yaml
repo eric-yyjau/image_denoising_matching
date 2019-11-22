@@ -7,8 +7,8 @@ data:
 
     shuffle: true
     preprocessing:
-        resize: [240, 320]  # False for coco
-        # resize: [480, 640]  # False for coco
+        # resize: [240, 320]  # False for coco
+        resize: [480, 640]  # False for coco
     ### augmentation
     augmentation:
         photometric:
@@ -30,7 +30,7 @@ data:
                 # motion_blur: {max_kernel_size: 3}
 
 training:
-    val_batches: 50 # batches of validation, batch = 1
+    val_batches: 2 # batches of validation, batch = 1
     reproduce: true
 
 model:

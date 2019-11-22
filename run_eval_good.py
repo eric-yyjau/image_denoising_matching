@@ -75,14 +75,16 @@ class sequence_info(object):
         gen_eval_name = lambda exp_name, iter, date: f"{exp_name}{iter}_{self.dataset}Test_{date}"
 
         sift_sigma = {
-            'sift_sig-1': ['sift_sig_', [5.0,5.0], 1],
+            # 'sift_sig-1': ['sift_sig_', [5.0,5.0], 1],
             # 'sift_sig-2': ['sift_sig_', [10.0,10.0], 1],
 
             ## add filters
-            'sift_sig-11': ['bi_sift_sig_', [5.0,5.0], 2], # 'bilateral
-            'sift_sig-12': ['bi_sift_sig_', [10.0,10.0], 2], # bilateral
+            # 'sift_sig-11': ['bi_sift_sig_', [5.0,5.0], 2], # 'bilateral
+            # 'sift_sig-12': ['bi_sift_sig_', [10.0,10.0], 2], # bilateral
 
-            # 'sift_sig-3': ['sift_sig_', [15.0,15.0], 1],
+            'sift_sig-3': ['sift_sig_', [15.0,15.0], 1],
+            'sift_sig-13': ['sift_sig_', [15.0,15.0], 2],
+
             # 'sift_sig-4': ['sift_sig_', [20.0,20.0], 1],
             # 'sift_sig-5': ['sift_sig_', [25.0,25.0], 1],
             # 'sift_sig_1': ['sift_sig_v1_', [5.0,5.0], 1],
