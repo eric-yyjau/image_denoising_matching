@@ -126,7 +126,9 @@ class PatchesDataset(object):
             image, warped_image = np.array(image), np.array(warped_image)
         homography = _adapt_homography_to_preprocessing(image_original, sample['homography'])
         sample = {'image': image, 'warped_image': warped_image,
-                                    'homography': homography}
+                                    'homography': homography,
+                                    'image_path': sample['image'],
+                                    'warped_image_path': sample['warped_image']}
         return sample
 
     def __len__(self):

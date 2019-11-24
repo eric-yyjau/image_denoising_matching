@@ -19,11 +19,17 @@ class Process_image(object):
         """
         from utils.photometric import ImgAugTransform
         augmentation = ImgAugTransform(**params)
-        img = img[:,:,np.newaxis]
+        grayscale = False
+        if len(img.shape) == 2:
+            grayscale = True
+            img = img[:,:,np.newaxis]
         img = augmentation(img)
         # cusAug = self.customizedTransform()
         # img = cusAug(img, **self.config['augmentation'])
-        return np.squeeze(img, axis=2)
+        if grayscale:
+            img = np.squeeze(img, axis=2)
+            
+        return img
     # img_noise = imgPhotometric(img_np, **config['data']['augmentation'])
     # print(f"aug: {config['data']['augmentation']}")
     # plt.imshow(np.squeeze(img_noise, axis=2))

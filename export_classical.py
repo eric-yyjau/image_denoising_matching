@@ -84,6 +84,7 @@ def export_descriptor(config, output_dir, args):
 
     # for sample in tqdm(enumerate(test_loader)):
     for i, sample in tqdm(enumerate(test_loader)):
+        print(f"image path: {sample['image_path']}, warped image path: {sample['warped_image_path']}")
         if config["training"]["val_batches"] != -1 and (
             i > config["training"]["val_batches"]
         ):  ##### check: how to limit the validation

@@ -13,9 +13,17 @@ from tqdm import tqdm
 from utils.draw import plot_imgs
 from utils.logging import *
 
-def draw_matches_cv(data, matches):
-    keypoints1 = [cv2.KeyPoint(p[1], p[0], 1) for p in data['keypoints1']]
-    keypoints2 = [cv2.KeyPoint(p[1], p[0], 1) for p in data['keypoints2']]
+def draw_matches_cv(data, matches, plot_points=True):
+    if plot_points:
+        keypoints1 = [cv2.KeyPoint(p[1], p[0], 1) for p in data['keypoints1']]
+        keypoints2 = [cv2.KeyPoint(p[1], p[0], 1) for p in data['keypoints2']]
+    else:
+        matches_pts = data['matches']
+        keypoints1 = [cv2.KeyPoint(p[0], p[1], 1) for p in matches_pts]
+        keypoints2 = [cv2.KeyPoint(p[2], p[3], 1) for p in matches_pts]
+        print(f"matches_pts: {matches_pts}")
+        # keypoints1, keypoints2 = [], []
+
     inliers = data['inliers'].astype(bool)
     # matches = np.array(data['matches'])[inliers].tolist()
     # matches = matches[inliers].tolist()
@@ -308,7 +316,11 @@ def evaluate(args, **options):
                 # draw matches
                 result['image1'] = image
                 result['image2'] = warped_image
-                img = draw_matches_cv(result, result['cv2_matches'])
+                matches = np.array(result['cv2_matches'])
+                ratio = 0.2
+                ran_idx = np.random.choice(matches.shape[0], int(matches.shape[0]*ratio))
+
+                img = draw_matches_cv(result, matches[ran_idx], plot_points=True)
                 # filename = "correspondence_visualization"
                 plot_imgs([img], titles=["Two images feature correspondences"], dpi=200)
                 plt.tight_layout()
@@ -321,7 +333,28 @@ def evaluate(args, **options):
             if matches.shape[0] > 0:
                 from utils.draw import draw_matches
                 filename = path_match + '/' + f_num + 'm.png'
-                draw_matches(image, warped_image, matches, filename=filename)
+                ratio = 0.1
+                inliers = result['inliers']
+
+                matches_in = matches[inliers == True]
+                matches_out = matches[inliers == False]
+
+                def get_random_m(matches, ratio):
+                    ran_idx = np.random.choice(matches.shape[0], int(matches.shape[0]*ratio))               
+                    return matches[ran_idx], ran_idx
+                image = data['image_fil']
+                warped_image = data['warped_image_fil']
+                ## outliers
+                matches_temp, _ = get_random_m(matches_out, ratio)
+                # print(f"matches_in: {matches_in.shape}, matches_temp: {matches_temp.shape}")
+                draw_matches(image, warped_image, matches_temp, lw=0.5, color='r',
+                            filename=None, show=False, if_fig=True)
+                ## inliers
+                matches_temp, _ = get_random_m(matches_in, ratio)
+                draw_matches(image, warped_image, matches_temp, lw=1.0, 
+                        filename=filename, show=False, if_fig=False)
+
+
 
 
 
