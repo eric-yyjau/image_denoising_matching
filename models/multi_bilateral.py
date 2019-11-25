@@ -117,24 +117,17 @@ class MultiBilateral():
             for i in range(LP.shape[0]):
                 LP_bilateral[i] = cv2.bilateralFilter(np.float32(LP[i]), 
                             d, sigmaColor, sigmaSpace)
-            
-    #        eps = 1e-4
-    #        LP_bilateral = denoise_bilateral(LP-LP.min()+eps, win_size = d, 
-    #                                         sigma_color = sigmaColor, 
-    #                                         sigma_spatial = sigmaSpace,
-    #                                         mode ='reflect',
-    #                                         multichannel=True)+LP.min()-eps
-                    
+                                
 #            # --- denoise HP with thresholding
             level = dcoeffs[l]
             if self.threshold_type == "BayesShrink":
                 threshold = [ _bayes_thresh(channel, var) for channel in level]
+                denoised_detail = [pywt.threshold(channel, value=thres, mode=self.mode) \
+                                   for thres, channel in zip(threshold,level)]
             # TODO: add VisuShrink
             #elif self.threshold_type == "VisuShrink": 
             else:
-                threshold = [ 0 for channel in level]
-            denoised_detail = [pywt.threshold(channel, value=thres, mode=self.mode) \
-                               for thres, channel in zip(threshold,level)]
+                denoised_detail = level
 #            print(LP_bilateral.shape)            
 #            print(denoised_detail[0].shape,denoised_detail[1].shape,denoised_detail[2].shape)
             coeffs_rec = [LP_bilateral] + [denoised_detail]
