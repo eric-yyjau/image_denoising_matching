@@ -49,11 +49,11 @@ class Process_image(object):
     #         d = 50
     #         sigmaColor = 75/255
     #         sigmaSpace = 75
+            print(f"params: {params}")
             d = params['d']
             sigmaColor = params['sigmaColor']
             sigmaSpace = params['sigmaSpace']
-            img = bilateral(np.float32(img), d, sigmaColor, sigmaSpace)
-
+            img = bilateral(np.float32(img), d=d, sigmaColor=sigmaColor, sigmaSpace=sigmaSpace)
         return img
 
     @staticmethod
@@ -79,6 +79,19 @@ class Process_image(object):
 
         return config, files_list        
 
+    @staticmethod
+    def get_bilateral_params(sigma):
+    #     sigma_n = 25/255
+        sigma_n = sigma/255
+        bilateral_params = {
+    #         'd': 0,
+            'd': 25,
+            'sigmaColor': sigma_n*2,
+    #         'sigmaColor': 75/255,
+            'sigmaSpace': 75,
+    #         'sigmaSpace': 3*sigma,
+        }
+        return bilateral_params
 
 # sigma=0
 # bilateral_params = {

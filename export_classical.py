@@ -20,6 +20,7 @@ from utils.utils import getWriterPath
 import cv2
 from utils.logging import *
 
+from utils.vis_tools import Process_image
 
 def export_descriptor(config, output_dir, args):
     '''
@@ -81,6 +82,7 @@ def export_descriptor(config, output_dir, args):
     max_length = 5
     method = config['model']['method']
     # tracker = PointTracker(max_length, nn_thresh=fe.nn_thresh)
+    img_processor = Process_image()
 
     # for sample in tqdm(enumerate(test_loader)):
     for i, sample in tqdm(enumerate(test_loader)):
@@ -91,33 +93,41 @@ def export_descriptor(config, output_dir, args):
             break
         img_0, img_1 = sample['image'], sample['warped_image']
 
-        def filter_before_matching(img, filter=None):
-            """
-            input: 
-                img: np.float[H, W, ..] (from 0 to 1)
 
-            """
-            from models.bilateral import bilateral
-            if filter is None: 
-                return img
-            elif filter == 'bilateral':
-                logging.info(f"using {filter} filter")
-                d = 0  # use the settings for all noise levels
-                sigmaColor = 75
-                sigmaSpace = 75                
-                img = bilateral(np.float32(img), d, sigmaColor/255, sigmaSpace)
+        # def filter_before_matching(img, filter=None):
+        #     """
+        #     input: 
+        #         img: np.float[H, W, ..] (from 0 to 1)
 
-            return img
+        #     """
+        #     from models.bilateral import bilateral
+        #     if filter is None: 
+        #         return img
+        #     elif filter == 'bilateral':
+        #         logging.info(f"using {filter} filter")
+        #         d = 0  # use the settings for all noise levels
+        #         sigmaColor = 75
+        #         sigmaSpace = 75                
+        #         img = bilateral(np.float32(img), d, sigmaColor/255, sigmaSpace)
+
+        #     return img
+        
+        
         # img = img_0.numpy().squeeze()
         # first image, no matches
         imgs_np, imgs_fil = [], []
         img = img_0.numpy().squeeze()
         imgs_np.append(img)
-        img = filter_before_matching(img, filter=config['model']['filter'])
+        # img = filter_before_matching(img, filter=config['model']['filter'])
+        sigma_n = config['data']['augmentation']['photometric']['params']['additive_gaussian_noise']['stddev_range'][0]
+        bilateral_params = img_processor.get_bilateral_params(sigma_n)
+        if config['model']['filter'] is not None:
+            print(f"filter: {config['model']['filter']}, bilateral_params: {bilateral_params}")
+        img = img_processor.filter_before_matching(img, filter=config['model']['filter'], params=bilateral_params)
         imgs_fil.append(img)
         img = img_1.numpy().squeeze()
         imgs_np.append(img)
-        img = filter_before_matching(img, filter=config['model']['filter'])
+        img = img_processor.filter_before_matching(img, filter=config['model']['filter'], params=bilateral_params)
         imgs_fil.append(img)
 
         # H, W = img.shape[1], img.shape[2]
