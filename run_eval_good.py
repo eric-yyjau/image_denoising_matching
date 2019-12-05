@@ -68,6 +68,41 @@ class sequence_info(object):
 
         pass
 
+    @staticmethod
+    def get_result_dict(seq_dict, base_path="", folder_idx=4, file_idx=''):
+        files_dict = {}
+        for i, en in enumerate(seq_dict):
+            files_dict[en] = (
+                Path(base_path) / seq_dict[en][folder_idx] / Path(file_idx)
+            )
+        
+        return files_dict        
+
+    @staticmethod
+    def load_print_file(file, if_print=False):
+        allow_pickle = True
+        exp = np.load(file, allow_pickle=allow_pickle)
+        print(list(exp))
+        # for i, en in enumerate(exp):
+        #     print(f"exp[{en}], {exp[en]}")
+            
+        ## homography [1,3,5]
+        result_list = []
+        print(f"homo-1, homo-3, homo5, rep, MLE, NN mAP, mscores")
+        homo = exp['correctness'][:,:3].mean(axis=0)
+        result_list.extend(homo)
+        # for h in homo:
+        #     print(h)
+
+        result_en = ['repeatability', 'localization_err', 'mAP', 'mscore']
+        for i, en in enumerate(result_en):
+            num = exp[en].mean()
+            result_list.append(num)
+        #     print(num)
+        output = ", ".join([f"{r:.3}" for r in result_list])
+        print(output)
+        return output
+
     def get_sequences(self, name='', date='1107'):
         """
         sequences: 
@@ -77,14 +112,36 @@ class sequence_info(object):
         gen_eval_name = lambda exp_name, fil, iter, date: f"{exp_name}{iter}_{fil}_{self.dataset}Test_{date}"
 
         sift_sigma = {
-            'sift_sig-1': ['sift_sig_', [5.0,5.0], 2, 'None'],
-            # 'sift_sig-2': ['sift_sig_', [10.0,10.0], 2, 'None'],
-            # 'sift_sig-2': ['sift_sig_', [15.0,15.0], 2, 'None'],
 
             ## add filters
-            'sift_sig-5-1': ['sift_sig_', [5.0,5.0], 2, 'median'], # 'bilateral
-            'sift_sig-5-2': ['sift_sig_', [5.0,5.0], 2, 'bilateral'], # bilateral
-            'sift_sig-5-3': ['sift_sig_', [5.0,5.0], 2, 'm_bilateral'], # bilateral
+            # 'sift_sig-1': ['sift_sig_', [5.0,5.0], 2, 'None'],
+            # 'sift_sig-5-1': ['sift_sig_', [5.0,5.0], 2, 'median'], # 'bilateral
+            # 'sift_sig-5-2': ['sift_sig_', [5.0,5.0], 2, 'bilateral'], # bilateral
+            # 'sift_sig-5-3': ['sift_sig_', [5.0,5.0], 2, 'm_bilateral'], # bilateral
+
+            ## sigma = 10
+            'sift_sig-10-0': ['sift_sig_', [10.0,10.0], 2, 'None'],
+            'sift_sig-10-1': ['sift_sig_', [10.0,10.0], 2, 'median'], # 'bilateral
+            'sift_sig-10-2': ['sift_sig_', [10.0,10.0], 2, 'bilateral'], # bilateral
+            'sift_sig-10-3': ['sift_sig_', [10.0,10.0], 2, 'm_bilateral'], # bilateral
+
+            ## sigma = 15
+            'sift_sig-15-0': ['sift_sig_', [15.0,15.0], 2, 'None'],
+            'sift_sig-15-1': ['sift_sig_', [15.0,15.0], 2, 'median'], # 'bilateral
+            'sift_sig-15-2': ['sift_sig_', [15.0,15.0], 2, 'bilateral'], # bilateral
+            'sift_sig-15-3': ['sift_sig_', [15.0,15.0], 2, 'm_bilateral'], # bilateral
+
+            ## sigma = 20
+            'sift_sig-20-0': ['sift_sig_', [20.0,20.0], 2, 'None'],
+            'sift_sig-20-1': ['sift_sig_', [20.0,20.0], 2, 'median'], # 'bilateral
+            'sift_sig-20-2': ['sift_sig_', [20.0,20.0], 2, 'bilateral'], # bilateral
+            'sift_sig-20-3': ['sift_sig_', [20.0,20.0], 2, 'm_bilateral'], # bilateral
+
+            ## sigma = 25
+            'sift_sig-25-0': ['sift_sig_', [25.0,25.0], 2, 'None'],
+            'sift_sig-25-1': ['sift_sig_', [25.0,25.0], 2, 'median'], # 'bilateral
+            'sift_sig-25-2': ['sift_sig_', [25.0,25.0], 2, 'bilateral'], # bilateral
+            'sift_sig-25-3': ['sift_sig_', [25.0,25.0], 2, 'm_bilateral'], # bilateral
 
             # 'sift_sig-3': ['sift_sig_', [15.0,15.0], 2, 'None'],
             # 'sift_sig-13': ['sift_sig_', [15.0,15.0], 2, 'bilateral'],
@@ -198,12 +255,17 @@ if __name__ == "__main__":
         # check_files = "predictions/result.npz" if model_base == "sift" else "DeepF_err_ratio.npz" 
         check_files = "predictions/result.npz" if model_base == "sift" else ""
         logging.info(f"++++++++ check_output ++++++++")
+        # for i, en in enumerate(sequence_dict):
+        seq = sequence_dict        
+        data = seq_manager.get_result_dict(seq, base_path="./logs/", folder_idx=4, file_idx='./predictions/result.npz')
+        print(f'{data}')
+            # new_eval_name = data['new_eval_name']
         for i, en in enumerate(sequence_dict):
-            seq = sequence_dict[en]        
-            data = seq_manager.get_data_from_a_seq(seq)
-            new_eval_name = data['new_eval_name']
-            check_exit(f"{exp_path}/{new_eval_name}/{check_files}", entry=en, should_exist=True)       
+            if check_exit(f"{data[en]}", entry=en, should_exist=True):
+                seq_manager.load_print_file(data[en])
         logging.info(f"++++++++ end check_output ++++++++")
+        ## output to table
+
         
 
     if if_scp or if_check_exist:
