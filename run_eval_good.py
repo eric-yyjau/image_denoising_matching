@@ -21,14 +21,16 @@ class sequence_info(object):
         # ['exp_name', 'model_deepF', 'model_SP', mode, 'new_eval_name',]
         """
         mode, exp_name, params = seq[2], seq[0], seq[1]
-        new_eval_name = seq[3]
+        filter = seq[3]
+        new_eval_name = seq[4]
         return {
             'mode': mode, 'exp_name': exp_name, 'params': params,
+            'filter': filter,
             'new_eval_name': new_eval_name,
         }
 
     @staticmethod
-    def update_config(config, mode=1, param=0, if_print=True):
+    def update_config(config, mode=1, param=0, if_print=True, filter=None):
         if mode == 0:
             pass
             # config['training']['pretrained'] = pretrained
@@ -41,7 +43,7 @@ class sequence_info(object):
             config['data']['augmentation']['photometric']['enable'] = True
             assert config['data']['augmentation']['photometric']['enable'] == True
             config['data']['augmentation']['photometric']['params']['additive_gaussian_noise']['stddev_range'] = param
-            config['model']['filter'] = 'bilateral'
+            config['model']['filter'] = filter
 
         if if_print and mode <= 5:
             logging.info(f"update params: {config['data']['augmentation']}")
@@ -72,18 +74,20 @@ class sequence_info(object):
         # ['exp_name', 'param', mode, 'new_eval_name',]
         """
         # gen_eval_name = lambda exp_name, iter, date: f"{exp_name}{iter}_{self.dataset}Testall_{date}"
-        gen_eval_name = lambda exp_name, iter, date: f"{exp_name}{iter}_{self.dataset}Test_{date}"
+        gen_eval_name = lambda exp_name, fil, iter, date: f"{exp_name}{iter}_{fil}_{self.dataset}Test_{date}"
 
         sift_sigma = {
-            # 'sift_sig-1': ['sift_sig_', [5.0,5.0], 1],
-            # 'sift_sig-2': ['sift_sig_', [10.0,10.0], 1],
+            'sift_sig-1': ['sift_sig_', [5.0,5.0], 2, 'None'],
+            # 'sift_sig-2': ['sift_sig_', [10.0,10.0], 2, 'None'],
+            # 'sift_sig-2': ['sift_sig_', [15.0,15.0], 2, 'None'],
 
             ## add filters
-            # 'sift_sig-11': ['bi_sift_sig_', [5.0,5.0], 2], # 'bilateral
-            # 'sift_sig-12': ['bi_sift_sig_', [10.0,10.0], 2], # bilateral
+            'sift_sig-5-1': ['sift_sig_', [5.0,5.0], 2, 'median'], # 'bilateral
+            'sift_sig-5-2': ['sift_sig_', [5.0,5.0], 2, 'bilateral'], # bilateral
+            'sift_sig-5-3': ['sift_sig_', [5.0,5.0], 2, 'm_bilateral'], # bilateral
 
-            'sift_sig-3': ['sift_sig_', [15.0,15.0], 1],
-            'sift_sig-13': ['sift_sig_', [15.0,15.0], 2],
+            # 'sift_sig-3': ['sift_sig_', [15.0,15.0], 2, 'None'],
+            # 'sift_sig-13': ['sift_sig_', [15.0,15.0], 2, 'bilateral'],
 
             # 'sift_sig-4': ['sift_sig_', [20.0,20.0], 1],
             # 'sift_sig-5': ['sift_sig_', [25.0,25.0], 1],
@@ -106,9 +110,11 @@ class sequence_info(object):
             logging.error(f"sequence name: {name} doesn't exist")
         else:
             idx_exp_name = 0
+            idx_fil = 3
             idx_iter = 1
             for i, en in enumerate(sequence):
-                eval_name = gen_eval_name(sequence[en][idx_exp_name], sequence[en][idx_iter][0], date)
+                eval_name = gen_eval_name(sequence[en][idx_exp_name], sequence[en][idx_iter][0], 
+                            sequence[en][idx_fil], date)
                 sequence[en].extend([eval_name])
         return sequence
             # 1, 'superpoint_kitti_heat2_0', 50000,  ## no need to run
@@ -169,7 +175,7 @@ if __name__ == "__main__":
 
     # download
     seq_manager = sequence_info(dataset=dataset)
-    sequence_dict = seq_manager.get_sequences(name=f'{model_base}_sigma', date='50sample_1120')  # Gamma1.5_1114
+    sequence_dict = seq_manager.get_sequences(name=f'{model_base}_sigma', date='50sample_1204')  # Gamma1.5_1114
     logging.info(f"get sequence_dict: {sequence_dict}")
 
     if args.export_sequences is not None:
@@ -206,7 +212,8 @@ if __name__ == "__main__":
             seq = sequence_dict[en]
             data = seq_manager.get_data_from_a_seq(seq)
             mode, exp_name, pretrained, pretrained_SP = data['mode'], data['exp_name'], data['pretrained'], data['pretrained_SP']
-            temp_config, files = seq_manager.update_config(config, mode, exp_path, exp_name, pretrained, pretrained_SP)
+            temp_config, files = seq_manager.update_config(config, mode, exp_path, 
+                        exp_name, pretrained, pretrained_SP)
             # mkdir
             exp_dir = Path(f'{exp_path}/{exp_name}')
             exp_dir_checkpoint = exp_dir/'checkpoints'
@@ -249,9 +256,11 @@ if __name__ == "__main__":
             data = seq_manager.get_data_from_a_seq(seq)
             # mode, exp_name, pretrained, pretrained_SP = data['mode'], data['exp_name'], data['pretrained'], data['pretrained_SP']
             mode, exp_name, params = data['mode'], data['exp_name'], data['params']
+            filter = data.get("filter", None)
             new_eval_name = data['new_eval_name']
             # update config
-            temp_config, _ = seq_manager.update_config(config, mode=mode, param=params, if_print=True)
+            temp_config, _ = seq_manager.update_config(config, mode=mode, 
+                        param=params, if_print=True, filter=filter)
             logging.info(f"temp_config: {temp_config}")
             temp_config_file = "temp_config_apo.yaml"
             # dump config
@@ -265,8 +274,10 @@ if __name__ == "__main__":
                         {new_eval_name}")
                 # logging.info(f"running command: {command}")
                 # subprocess.run(f"{command}", shell=True, check=True)
+                plot_img = False
+                command_plot = '--outputImg --plotMatching' if plot_img == True else ''
                 commands.append(f"python evaluation.py ./logs/{new_eval_name}/predictions \
-                    --repeatibility --outputImg --homography --plotMatching")
+                    --repeatibility --homography {command_plot}")
             for command in commands:
                 logging.info(f"running command: {command}")
                 subprocess.run(f"{command}", shell=True, check=True)

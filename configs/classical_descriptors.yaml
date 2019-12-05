@@ -31,7 +31,7 @@ data:
                 # motion_blur: {max_kernel_size: 3}
 
 training:
-    val_batches: 2 # batches of validation, batch = 1
+    val_batches: 50 # batches of validation, batch = 1
     reproduce: true
 
 model:

@@ -42,7 +42,11 @@ class Process_image(object):
             img: np.float[H, W, ..] (from 0 to 1)
 
         """
-        from models.bilateral import bilateral
+#         from models.bilateral import bilateral, median
+        from models.single_res_filters import bilateral, median
+        from models.multi_bilateral import MultiBilateral
+        d = params['d']
+
         if filter is None: 
             return img
         elif filter == 'bilateral':
@@ -50,10 +54,26 @@ class Process_image(object):
     #         sigmaColor = 75/255
     #         sigmaSpace = 75
             print(f"params: {params}")
-            d = params['d']
             sigmaColor = params['sigmaColor']
             sigmaSpace = params['sigmaSpace']
             img = bilateral(np.float32(img), d=d, sigmaColor=sigmaColor, sigmaSpace=sigmaSpace)
+        elif filter == 'median':
+            img = median(img, d)
+            pass
+        elif filter == 'm_bilateral':
+            multi_bilateral = MultiBilateral(wavelet_type = 'db8', wavelet_levels = 4, 
+                                             threshold_type = 'None', #'BayesShrink', 
+                                             sigma=None, mode='soft')
+            sigmaColor = params['sigmaColor']
+            sigmaSpace = params['sigmaSpace'] # default 1.8
+            if len(img.shape) == 2:
+                img = img[..., np.newaxis]
+            img = multi_bilateral.denoise(img, d=d, sigmaColor=sigmaColor, sigmaSpace=sigmaSpace)
+            pass
+        else:
+            logging.warning(f"filter type {filter} not defined")
+    
+        
         return img
 
     @staticmethod
@@ -83,12 +103,21 @@ class Process_image(object):
     def get_bilateral_params(sigma):
     #     sigma_n = 25/255
         sigma_n = sigma/255
+    #     bilateral_params = {
+    # #         'd': 0,
+    #         'd': 25,
+    #         'sigmaColor': sigma_n*2,
+    # #         'sigmaColor': 75/255,
+    #         'sigmaSpace': 75,
+    # #         'sigmaSpace': 3*sigma,
+    #     }
+
         bilateral_params = {
     #         'd': 0,
-            'd': 25,
+            'd': 11,
             'sigmaColor': sigma_n*2,
     #         'sigmaColor': 75/255,
-            'sigmaSpace': 75,
+            'sigmaSpace': 1.8,
     #         'sigmaSpace': 3*sigma,
         }
         return bilateral_params
