@@ -120,7 +120,8 @@ def export_descriptor(config, output_dir, args):
         imgs_np.append(img)
         # img = filter_before_matching(img, filter=config['model']['filter'])
         sigma_n = config['data']['augmentation']['photometric']['params']['additive_gaussian_noise']['stddev_range'][0]
-        bilateral_params = img_processor.get_bilateral_params(sigma_n)
+        filter_d = config['model'].get('filter_d', 11)
+        bilateral_params = img_processor.get_bilateral_params(sigma_n, filter_d)
         if config['model']['filter'] is not None:
             print(f"filter: {config['model']['filter']}, bilateral_params: {bilateral_params}")
         img = img_processor.filter_before_matching(img, filter=config['model']['filter'], params=bilateral_params)

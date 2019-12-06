@@ -38,6 +38,7 @@ model:
     name: 'classical_detectors_descriptors'
     filter: # 'bilateral'
     filter: 'bilateral'
+    filter_d: 11
     method: 'sift'  # 'orb' 'sift'
     batch_size: 1  # unused
     learning_rate: 0.001  # unused

@@ -60,9 +60,10 @@ class Process_image(object):
         elif filter == 'median':
             img = median(img, d)
             pass
-        elif filter == 'm_bilateral':
+        elif filter == 'm_bilateral' or filter == 'm_bilateral_thd':
+            threshold_type = 'None' if filter == 'm_bilateral' else 'BayesShrink'
             multi_bilateral = MultiBilateral(wavelet_type = 'db8', wavelet_levels = 4, 
-                                             threshold_type = 'None', #'BayesShrink', 
+                                             threshold_type = threshold_type, #'BayesShrink', 
                                              sigma=None, mode='soft')
             sigmaColor = params['sigmaColor']
             sigmaSpace = params['sigmaSpace'] # default 1.8
@@ -100,7 +101,7 @@ class Process_image(object):
         return config, files_list        
 
     @staticmethod
-    def get_bilateral_params(sigma):
+    def get_bilateral_params(sigma, d=11):
     #     sigma_n = 25/255
         sigma_n = sigma/255
     #     bilateral_params = {
@@ -114,7 +115,7 @@ class Process_image(object):
 
         bilateral_params = {
     #         'd': 0,
-            'd': 11,
+            'd': d,
             'sigmaColor': sigma_n*2,
     #         'sigmaColor': 75/255,
             'sigmaSpace': 1.8,

@@ -22,15 +22,17 @@ class sequence_info(object):
         """
         mode, exp_name, params = seq[2], seq[0], seq[1]
         filter = seq[3]
-        new_eval_name = seq[4]
+        filter_d = seq[4]
+        new_eval_name = seq[5]
         return {
             'mode': mode, 'exp_name': exp_name, 'params': params,
             'filter': filter,
             'new_eval_name': new_eval_name,
+            'filter_d': filter_d,
         }
 
     @staticmethod
-    def update_config(config, mode=1, param=0, if_print=True, filter=None):
+    def update_config(config, mode=1, param=0, if_print=True, filter=None, filter_d=0):
         if mode == 0:
             pass
             # config['training']['pretrained'] = pretrained
@@ -44,6 +46,7 @@ class sequence_info(object):
             assert config['data']['augmentation']['photometric']['enable'] == True
             config['data']['augmentation']['photometric']['params']['additive_gaussian_noise']['stddev_range'] = param
             config['model']['filter'] = filter
+            config['model']['filter_d'] = filter_d
 
         if if_print and mode <= 5:
             logging.info(f"update params: {config['data']['augmentation']}")
@@ -114,42 +117,53 @@ class sequence_info(object):
         sift_sigma = {
 
             ## add filters
-            # 'sift_sig-1': ['sift_sig_', [5.0,5.0], 2, 'None'],
-            # 'sift_sig-5-1': ['sift_sig_', [5.0,5.0], 2, 'median'], # 'bilateral
+            ## sigma = 0
+            # 'sift_sig-0-0': ['sift_sig_', [0.0,0.0], 2, 'None', 0],
+            # 'sift_sig-0-1': ['sift_sig_', [0.0,0.0], 2, 'median', 3], # median
+            # 'sift_sig-0-2': ['sift_sig_', [0.0,0.0], 2, 'bilateral'], # bilateral
+            # 'sift_sig-0-3': ['sift_sig_', [0.0,0.0], 2, 'm_bilateral'], # m_bilateral
+
+            # ## sigma = 5
+            # 'sift_sig-5-0': ['sift_sig_', [5.0,5.0], 2, 'None'],
+            # 'sift_sig-5-1': ['sift_sig_', [5.0,5.0], 2, 'median', 3], # 'bilateral
             # 'sift_sig-5-2': ['sift_sig_', [5.0,5.0], 2, 'bilateral'], # bilateral
             # 'sift_sig-5-3': ['sift_sig_', [5.0,5.0], 2, 'm_bilateral'], # bilateral
+            'sift_sig-5-1-5': ['sift_sig_', [5.0,5.0], 2, 'median', 5], # 'bilateral
+            'sift_sig-5-4': ['sift_sig_', [5.0,5.0], 2, 'm_bilateral_thd', 11], # bilateral_thd
 
             ## sigma = 10
-            'sift_sig-10-0': ['sift_sig_', [10.0,10.0], 2, 'None'],
-            'sift_sig-10-1': ['sift_sig_', [10.0,10.0], 2, 'median'], # 'bilateral
-            'sift_sig-10-2': ['sift_sig_', [10.0,10.0], 2, 'bilateral'], # bilateral
-            'sift_sig-10-3': ['sift_sig_', [10.0,10.0], 2, 'm_bilateral'], # bilateral
+            # 'sift_sig-10-0': ['sift_sig_', [10.0,10.0], 2, 'None'],
+            ###'sift_sig-10-1-7': ['sift_sig_', [10.0,10.0], 2, 'median', 7], # 'bilateral
+            ###'sift_sig-10-1-9': ['sift_sig_', [10.0,10.0], 2, 'median', 9], # 'bilateral
+            # 'sift_sig-10-2': ['sift_sig_', [10.0,10.0], 2, 'bilateral'], # bilateral
+            # 'sift_sig-10-3': ['sift_sig_', [10.0,10.0], 2, 'm_bilateral'], # bilateral
+            'sift_sig-10-1-5': ['sift_sig_', [10.0,10.0], 2, 'median', 5], # 'bilateral
+            'sift_sig-10-3': ['sift_sig_', [10.0,10.0], 2, 'm_bilateral_thd', 11], # bilateral
 
-            ## sigma = 15
-            'sift_sig-15-0': ['sift_sig_', [15.0,15.0], 2, 'None'],
-            'sift_sig-15-1': ['sift_sig_', [15.0,15.0], 2, 'median'], # 'bilateral
-            'sift_sig-15-2': ['sift_sig_', [15.0,15.0], 2, 'bilateral'], # bilateral
-            'sift_sig-15-3': ['sift_sig_', [15.0,15.0], 2, 'm_bilateral'], # bilateral
+            # ## sigma = 15
+            # 'sift_sig-15-0': ['sift_sig_', [15.0,15.0], 2, 'None'],
+            # 'sift_sig-15-1': ['sift_sig_', [15.0,15.0], 2, 'median', 3], # 'bilateral
+            # 'sift_sig-15-2': ['sift_sig_', [15.0,15.0], 2, 'bilateral'], # bilateral
+            # 'sift_sig-15-3': ['sift_sig_', [15.0,15.0], 2, 'm_bilateral'], # bilateral
+            'sift_sig-15-1-5': ['sift_sig_', [15.0,15.0], 2, 'median', 5], # 'bilateral
+            'sift_sig-15-4': ['sift_sig_', [15.0,15.0], 2, 'm_bilateral_thd', 11], # bilateral_thd
 
-            ## sigma = 20
-            'sift_sig-20-0': ['sift_sig_', [20.0,20.0], 2, 'None'],
-            'sift_sig-20-1': ['sift_sig_', [20.0,20.0], 2, 'median'], # 'bilateral
-            'sift_sig-20-2': ['sift_sig_', [20.0,20.0], 2, 'bilateral'], # bilateral
-            'sift_sig-20-3': ['sift_sig_', [20.0,20.0], 2, 'm_bilateral'], # bilateral
+            # ## sigma = 20
+            # 'sift_sig-20-0': ['sift_sig_', [20.0,20.0], 2, 'None'],
+            # 'sift_sig-20-1': ['sift_sig_', [20.0,20.0], 2, 'median', 3], # 'bilateral
+            # 'sift_sig-20-2': ['sift_sig_', [20.0,20.0], 2, 'bilateral'], # bilateral
+            # 'sift_sig-20-3': ['sift_sig_', [20.0,20.0], 2, 'm_bilateral'], # bilateral
+            'sift_sig-20-1-5': ['sift_sig_', [20.0,20.0], 2, 'median', 5], # 'bilateral
+            'sift_sig-20-4': ['sift_sig_', [20.0,20.0], 2, 'm_bilateral_thd', 11], # bilateral_thd
 
-            ## sigma = 25
-            'sift_sig-25-0': ['sift_sig_', [25.0,25.0], 2, 'None'],
-            'sift_sig-25-1': ['sift_sig_', [25.0,25.0], 2, 'median'], # 'bilateral
-            'sift_sig-25-2': ['sift_sig_', [25.0,25.0], 2, 'bilateral'], # bilateral
-            'sift_sig-25-3': ['sift_sig_', [25.0,25.0], 2, 'm_bilateral'], # bilateral
+            # ## sigma = 25
+            # 'sift_sig-25-0': ['sift_sig_', [25.0,25.0], 2, 'None'],
+            # 'sift_sig-25-1': ['sift_sig_', [25.0,25.0], 2, 'median', 3], # 'bilateral
+            # 'sift_sig-25-2': ['sift_sig_', [25.0,25.0], 2, 'bilateral'], # bilateral
+            # 'sift_sig-25-3': ['sift_sig_', [25.0,25.0], 2, 'm_bilateral'], # bilateral
+            'sift_sig-25-1-5': ['sift_sig_', [25.0,25.0], 2, 'median', 5], # 'bilateral
+            'sift_sig-25-4': ['sift_sig_', [25.0,25.0], 2, 'm_bilateral_thd', 11], # bilateral_thd
 
-            # 'sift_sig-3': ['sift_sig_', [15.0,15.0], 2, 'None'],
-            # 'sift_sig-13': ['sift_sig_', [15.0,15.0], 2, 'bilateral'],
-
-            # 'sift_sig-4': ['sift_sig_', [20.0,20.0], 1],
-            # 'sift_sig-5': ['sift_sig_', [25.0,25.0], 1],
-            # 'sift_sig_1': ['sift_sig_v1_', [5.0,5.0], 1],
-            # 'sift_sig_2': ['sift_sig_v2_', [5.0,5.0], 1],
         }
 
         # corr_ablation = {
@@ -171,7 +185,7 @@ class sequence_info(object):
             idx_iter = 1
             for i, en in enumerate(sequence):
                 eval_name = gen_eval_name(sequence[en][idx_exp_name], sequence[en][idx_iter][0], 
-                            sequence[en][idx_fil], date)
+                            f"{sequence[en][idx_fil]}{sequence[en][idx_fil+1]}", date)
                 sequence[en].extend([eval_name])
         return sequence
             # 1, 'superpoint_kitti_heat2_0', 50000,  ## no need to run
@@ -199,9 +213,11 @@ if __name__ == "__main__":
     
     parser.add_argument("-ce", "--check_exist", action="store_true", help="scp checkpoints to your current position")
     parser.add_argument("-co", "--check_output", action="store_true", help="check if already ran the sequence")
+    parser.add_argument("-p", "--plot", action="store_true", help="plot images in evaluation")
     parser.add_argument("--runEval", action="store_true", help="run evaluation")
     parser.add_argument("--runCorr", action="store_true", help="run correspondences evaluation")
     parser.add_argument("-es", "--export_sequences",  type=str, default=None, help="The name of dumped yaml")
+    
     # parser.add_argument("server", type=str, default='theia', help='scp from theia or hyperion')
     args = parser.parse_args()
     print(args)
@@ -209,11 +225,13 @@ if __name__ == "__main__":
     # assert dataset == 'kitti' or dataset == 'apollo', 'your dataset is not supported'
     assert dataset == 'hpatches', 'your dataset is not supported'
     if_scp = True if args.scp is not None else False
+
     scp_location = args.scp
     if_runEval = args.runEval
     if_runCorr = args.runCorr
     if_check_exist = args.check_exist
     if_check_output = args.check_output
+    if_plot_img = args.plot
     exp_path = args.exper_path
     model_base = args.model_base
     scp_from_server = args.scp_from_server
@@ -256,8 +274,8 @@ if __name__ == "__main__":
         check_files = "predictions/result.npz" if model_base == "sift" else ""
         logging.info(f"++++++++ check_output ++++++++")
         # for i, en in enumerate(sequence_dict):
-        seq = sequence_dict        
-        data = seq_manager.get_result_dict(seq, base_path="./logs/", folder_idx=4, file_idx='./predictions/result.npz')
+        seq = sequence_dict
+        data = seq_manager.get_result_dict(seq, base_path="./logs/", folder_idx=5, file_idx='./predictions/result.npz')
         print(f'{data}')
             # new_eval_name = data['new_eval_name']
         for i, en in enumerate(sequence_dict):
@@ -319,10 +337,11 @@ if __name__ == "__main__":
             # mode, exp_name, pretrained, pretrained_SP = data['mode'], data['exp_name'], data['pretrained'], data['pretrained_SP']
             mode, exp_name, params = data['mode'], data['exp_name'], data['params']
             filter = data.get("filter", None)
+            filter_d = data.get("filter_d", 11)
             new_eval_name = data['new_eval_name']
             # update config
             temp_config, _ = seq_manager.update_config(config, mode=mode, 
-                        param=params, if_print=True, filter=filter)
+                        param=params, if_print=True, filter=filter, filter_d=filter_d)
             logging.info(f"temp_config: {temp_config}")
             temp_config_file = "temp_config_apo.yaml"
             # dump config
@@ -336,8 +355,7 @@ if __name__ == "__main__":
                         {new_eval_name}")
                 # logging.info(f"running command: {command}")
                 # subprocess.run(f"{command}", shell=True, check=True)
-                plot_img = False
-                command_plot = '--outputImg --plotMatching' if plot_img == True else ''
+                command_plot = '--outputImg --plotMatching' if if_plot_img == True else ''
                 commands.append(f"python evaluation.py ./logs/{new_eval_name}/predictions \
                     --repeatibility --homography {command_plot}")
             for command in commands:
