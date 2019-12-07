@@ -124,44 +124,44 @@ class sequence_info(object):
             # 'sift_sig-0-3': ['sift_sig_', [0.0,0.0], 2, 'm_bilateral'], # m_bilateral
 
             # ## sigma = 5
-            # 'sift_sig-5-0': ['sift_sig_', [5.0,5.0], 2, 'None'],
+            'sift_sig-5-0': ['sift_sig_', [5.0,5.0], 2, 'None', 0],
             # 'sift_sig-5-1': ['sift_sig_', [5.0,5.0], 2, 'median', 3], # 'bilateral
             # 'sift_sig-5-2': ['sift_sig_', [5.0,5.0], 2, 'bilateral'], # bilateral
             # 'sift_sig-5-3': ['sift_sig_', [5.0,5.0], 2, 'm_bilateral'], # bilateral
-            'sift_sig-5-1-5': ['sift_sig_', [5.0,5.0], 2, 'median', 5], # 'bilateral
+            # 'sift_sig-5-1-5': ['sift_sig_', [5.0,5.0], 2, 'median', 5], # 'bilateral
             'sift_sig-5-4': ['sift_sig_', [5.0,5.0], 2, 'm_bilateral_thd', 11], # bilateral_thd
 
             ## sigma = 10
-            # 'sift_sig-10-0': ['sift_sig_', [10.0,10.0], 2, 'None'],
+            'sift_sig-10-0': ['sift_sig_', [10.0,10.0], 2, 'None', 0],
             ###'sift_sig-10-1-7': ['sift_sig_', [10.0,10.0], 2, 'median', 7], # 'bilateral
             ###'sift_sig-10-1-9': ['sift_sig_', [10.0,10.0], 2, 'median', 9], # 'bilateral
             # 'sift_sig-10-2': ['sift_sig_', [10.0,10.0], 2, 'bilateral'], # bilateral
-            # 'sift_sig-10-3': ['sift_sig_', [10.0,10.0], 2, 'm_bilateral'], # bilateral
+            'sift_sig-10-3': ['sift_sig_', [10.0,10.0], 2, 'm_bilateral', 11], # bilateral
             'sift_sig-10-1-5': ['sift_sig_', [10.0,10.0], 2, 'median', 5], # 'bilateral
             'sift_sig-10-3': ['sift_sig_', [10.0,10.0], 2, 'm_bilateral_thd', 11], # bilateral
 
             # ## sigma = 15
-            # 'sift_sig-15-0': ['sift_sig_', [15.0,15.0], 2, 'None'],
+            'sift_sig-15-0': ['sift_sig_', [15.0,15.0], 2, 'None', 0],
             # 'sift_sig-15-1': ['sift_sig_', [15.0,15.0], 2, 'median', 3], # 'bilateral
             # 'sift_sig-15-2': ['sift_sig_', [15.0,15.0], 2, 'bilateral'], # bilateral
             # 'sift_sig-15-3': ['sift_sig_', [15.0,15.0], 2, 'm_bilateral'], # bilateral
-            'sift_sig-15-1-5': ['sift_sig_', [15.0,15.0], 2, 'median', 5], # 'bilateral
+            # 'sift_sig-15-1-5': ['sift_sig_', [15.0,15.0], 2, 'median', 5], # 'bilateral
             'sift_sig-15-4': ['sift_sig_', [15.0,15.0], 2, 'm_bilateral_thd', 11], # bilateral_thd
 
             # ## sigma = 20
-            # 'sift_sig-20-0': ['sift_sig_', [20.0,20.0], 2, 'None'],
+            'sift_sig-20-0': ['sift_sig_', [20.0,20.0], 2, 'None', 0],
             # 'sift_sig-20-1': ['sift_sig_', [20.0,20.0], 2, 'median', 3], # 'bilateral
             # 'sift_sig-20-2': ['sift_sig_', [20.0,20.0], 2, 'bilateral'], # bilateral
             # 'sift_sig-20-3': ['sift_sig_', [20.0,20.0], 2, 'm_bilateral'], # bilateral
-            'sift_sig-20-1-5': ['sift_sig_', [20.0,20.0], 2, 'median', 5], # 'bilateral
+            # 'sift_sig-20-1-5': ['sift_sig_', [20.0,20.0], 2, 'median', 5], # 'bilateral
             'sift_sig-20-4': ['sift_sig_', [20.0,20.0], 2, 'm_bilateral_thd', 11], # bilateral_thd
 
             # ## sigma = 25
-            # 'sift_sig-25-0': ['sift_sig_', [25.0,25.0], 2, 'None'],
+            'sift_sig-25-0': ['sift_sig_', [25.0,25.0], 2, 'None', 0],
             # 'sift_sig-25-1': ['sift_sig_', [25.0,25.0], 2, 'median', 3], # 'bilateral
             # 'sift_sig-25-2': ['sift_sig_', [25.0,25.0], 2, 'bilateral'], # bilateral
             # 'sift_sig-25-3': ['sift_sig_', [25.0,25.0], 2, 'm_bilateral'], # bilateral
-            'sift_sig-25-1-5': ['sift_sig_', [25.0,25.0], 2, 'median', 5], # 'bilateral
+            # 'sift_sig-25-1-5': ['sift_sig_', [25.0,25.0], 2, 'median', 5], # 'bilateral
             'sift_sig-25-4': ['sift_sig_', [25.0,25.0], 2, 'm_bilateral_thd', 11], # bilateral_thd
 
         }
@@ -250,7 +250,7 @@ if __name__ == "__main__":
 
     # download
     seq_manager = sequence_info(dataset=dataset)
-    sequence_dict = seq_manager.get_sequences(name=f'{model_base}_sigma', date='50sample_1204')  # Gamma1.5_1114
+    sequence_dict = seq_manager.get_sequences(name=f'{model_base}_sigma', date='2sample_1204')  # Gamma1.5_1114
     logging.info(f"get sequence_dict: {sequence_dict}")
 
     if args.export_sequences is not None:
@@ -291,9 +291,15 @@ if __name__ == "__main__":
         for i, en in enumerate(sequence_dict):
             seq = sequence_dict[en]
             data = seq_manager.get_data_from_a_seq(seq)
-            mode, exp_name, pretrained, pretrained_SP = data['mode'], data['exp_name'], data['pretrained'], data['pretrained_SP']
-            temp_config, files = seq_manager.update_config(config, mode, exp_path, 
-                        exp_name, pretrained, pretrained_SP)
+            mode, exp_name, params = data['mode'], data['exp_name'], data['params']
+            filter = data.get("filter", None)
+            filter_d = data.get("filter_d", 11)
+            new_eval_name = data['new_eval_name']
+            # mode, exp_name, pretrained, pretrained_SP = data['mode'], data['exp_name'], data['pretrained'], data['pretrained_SP']
+            # temp_config, files = seq_manager.update_config(config, mode, exp_path, 
+                        # exp_name, pretrained, pretrained_SP)
+            temp_config, files = seq_manager.update_config(config, mode=mode, 
+                        param=params, if_print=True, filter=filter, filter_d=filter_d)
             # mkdir
             exp_dir = Path(f'{exp_path}/{exp_name}')
             exp_dir_checkpoint = exp_dir/'checkpoints'
@@ -306,25 +312,26 @@ if __name__ == "__main__":
             #     files = [f'{exp_dir}/config.yml', 
             #         temp_config['training']['pretrained'],
             #         temp_config['training']['pretrained_SP']]
-            for file in files:
-                exist = Path(file).exists()
-                if if_check_exist:
-                    if exist:
-                        logging.info(f"{en}: {file} exist? {exist}")
-                    else:
-                        logging.warning(f"{en}: {file} exist? {exist}")
-                if if_scp:
-                    from_server = scp_from_server
-                    if from_server:
-                        assert exist == False, f'{file} already exists, stoped.'
-                    else:
-                        assert exist == True, f'{file} not exists to scp, stoped.'
-                    # command = f"scp -r yyjau@hyperion.ucsd.edu:/home/yyjau/Documents/deepSfm/{file} {file}"
-                    # command = f"scp -r yyjau@theia.ucsd.edu:/home/yyjau/Documents/deepSfm/{file} {file}"
-                    # logging.info(f"[run command] {command}")
-                    # subprocess.run(f"{command}", shell=True, check=True)
-                    if len(file) > 0:
-                        scp_to_server(file, end_name=scp_location, from_server=from_server)
+            # for file in files:
+            file = f"logs/{new_eval_name}"
+            exist = Path(file).exists()
+            if if_check_exist:
+                if exist:
+                    logging.info(f"{en}: {file} exist? {exist}")
+                else:
+                    logging.warning(f"{en}: {file} exist? {exist}")
+            if if_scp:
+                from_server = scp_from_server
+                if from_server:
+                    assert exist == False, f'{file} already exists, stoped.'
+                else:
+                    assert exist == True, f'{file} not exists to scp, stoped.'
+                # command = f"scp -r yyjau@hyperion.ucsd.edu:/home/yyjau/Documents/deepSfm/{file} {file}"
+                command = f"scp -r yyjau@theia.ucsd.edu:/home/yyjau/Documents/image_denoising_matching/{file} {file}"
+                logging.info(f"[run command] {command}")
+                # subprocess.run(f"{command}", shell=True, check=True)
+                # if len(file) > 0:
+                    # scp_to_server(file, end_name=scp_location, from_server=from_server)
         logging.info(f"++++++++ end if_scp or if_check_exist ++++++++")
         pass
 
