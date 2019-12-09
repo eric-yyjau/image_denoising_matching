@@ -97,7 +97,7 @@ class MultiBilateralEst():
         self.mode = mode
         
 
-    def denoise(self, img, d=5, sigmaSpace=1.8):
+    def denoise(self, img, d=11, sigmaColor = 50/255, sigmaSpace=1.8):
         # channel first
         img = img.transpose(2,0,1)
         # --- wavelet transform
@@ -116,9 +116,9 @@ class MultiBilateralEst():
             # --- denoise LP with bilateral
             LP_bilateral = np.zeros_like(LP)
             for i in range(LP.shape[0]):
-                sigmaColor = 2*estimate_noise_fast(LP[i])
+                s = 2*estimate_noise_fast(LP[i])
                 LP_bilateral[i] = cv2.bilateralFilter(np.float32(LP[i]), 
-                            d, sigmaColor, sigmaSpace)
+                            d, s, sigmaSpace)
                                 
 #            # --- denoise HP with thresholding
             level = dcoeffs[l]
@@ -135,7 +135,8 @@ class MultiBilateralEst():
             
         # channel last
         img_out = LP.transpose(1,2,0)
-        sigmaColor = 2*estimate_noise_fast(img_out)
+        if sigmaColor is None:
+            sigmaColor = 2*estimate_noise_fast(img_out)
         img_out = cv2.bilateralFilter(np.float32(img_out),
                                       d, sigmaColor, sigmaSpace)
         
