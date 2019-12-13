@@ -109,7 +109,7 @@ class sequence_info(object):
     def get_sequences(self, name='', date='1107'):
         """
         sequences: 
-        # ['exp_name', 'param', mode, 'new_eval_name',]
+        # ['exp_name', 'param', mode, 'filter', filter_d]
         """
         # gen_eval_name = lambda exp_name, iter, date: f"{exp_name}{iter}_{self.dataset}Testall_{date}"
         gen_eval_name = lambda exp_name, fil, iter, date: f"{exp_name}{iter}_{fil}_{self.dataset}Test_{date}"
@@ -124,45 +124,50 @@ class sequence_info(object):
             # 'sift_sig-0-3': ['sift_sig_', [0.0,0.0], 2, 'm_bilateral'], # m_bilateral
 
             # ## sigma = 5
-            'sift_sig-5-0': ['sift_sig_', [5.0,5.0], 2, 'None', 0],
+            # 'sift_sig-5-0': ['sift_sig_', [5.0,5.0], 2, 'None', 0],
             # 'sift_sig-5-1': ['sift_sig_', [5.0,5.0], 2, 'median', 3], # 'bilateral
             # 'sift_sig-5-2': ['sift_sig_', [5.0,5.0], 2, 'bilateral'], # bilateral
             # 'sift_sig-5-3': ['sift_sig_', [5.0,5.0], 2, 'm_bilateral'], # bilateral
             # 'sift_sig-5-1-5': ['sift_sig_', [5.0,5.0], 2, 'median', 5], # 'bilateral
-            'sift_sig-5-4': ['sift_sig_', [5.0,5.0], 2, 'm_bilateral_thd', 11], # bilateral_thd
+            # 'sift_sig-5-4': ['sift_sig_', [5.0,5.0], 2, 'm_bilateral_thd', 11], # bilateral_thd
+            # 'sift_sig-5-5': ['sift_sig_', [5.0,5.0], 2, 'm_guided_thd', 1], # bilateral_thd
 
             ## sigma = 10
-            'sift_sig-10-0': ['sift_sig_', [10.0,10.0], 2, 'None', 0],
+            # 'sift_sig-10-0': ['sift_sig_', [10.0,10.0], 2, 'None', 0],
             ###'sift_sig-10-1-7': ['sift_sig_', [10.0,10.0], 2, 'median', 7], # 'bilateral
             ###'sift_sig-10-1-9': ['sift_sig_', [10.0,10.0], 2, 'median', 9], # 'bilateral
-            # 'sift_sig-10-2': ['sift_sig_', [10.0,10.0], 2, 'bilateral'], # bilateral
+            # 'sift_sig-10-2': ['sift_sig_', [10.0,10.0], 2, 'bilateral', 11], # bilateral
             'sift_sig-10-3': ['sift_sig_', [10.0,10.0], 2, 'm_bilateral', 11], # bilateral
-            'sift_sig-10-1-5': ['sift_sig_', [10.0,10.0], 2, 'median', 5], # 'bilateral
-            'sift_sig-10-3': ['sift_sig_', [10.0,10.0], 2, 'm_bilateral_thd', 11], # bilateral
+            # 'sift_sig-10-1-5': ['sift_sig_', [10.0,10.0], 2, 'median', 5], # 'bilateral
+            # 'sift_sig-10-4': ['sift_sig_', [10.0,10.0], 2, 'm_bilateral_thd', 11], # bilateral
+            # 'sift_sig-10-5': ['sift_sig_', [10.0,10.0], 2, 'm_guided_thd', 1], # bilateral
 
             # ## sigma = 15
-            'sift_sig-15-0': ['sift_sig_', [15.0,15.0], 2, 'None', 0],
+            # 'sift_sig-15-0': ['sift_sig_', [15.0,15.0], 2, 'None', 0],
             # 'sift_sig-15-1': ['sift_sig_', [15.0,15.0], 2, 'median', 3], # 'bilateral
             # 'sift_sig-15-2': ['sift_sig_', [15.0,15.0], 2, 'bilateral'], # bilateral
             # 'sift_sig-15-3': ['sift_sig_', [15.0,15.0], 2, 'm_bilateral'], # bilateral
             # 'sift_sig-15-1-5': ['sift_sig_', [15.0,15.0], 2, 'median', 5], # 'bilateral
-            'sift_sig-15-4': ['sift_sig_', [15.0,15.0], 2, 'm_bilateral_thd', 11], # bilateral_thd
+            # 'sift_sig-15-4': ['sift_sig_', [15.0,15.0], 2, 'm_bilateral_thd', 11], # bilateral_thd
+            # 'sift_sig-15-5': ['sift_sig_', [15.0,15.0], 2, 'm_guided_thd', 1], # bilateral_thd
 
             # ## sigma = 20
-            'sift_sig-20-0': ['sift_sig_', [20.0,20.0], 2, 'None', 0],
+            # 'sift_sig-20-0': ['sift_sig_', [20.0,20.0], 2, 'None', 0],
             # 'sift_sig-20-1': ['sift_sig_', [20.0,20.0], 2, 'median', 3], # 'bilateral
             # 'sift_sig-20-2': ['sift_sig_', [20.0,20.0], 2, 'bilateral'], # bilateral
             # 'sift_sig-20-3': ['sift_sig_', [20.0,20.0], 2, 'm_bilateral'], # bilateral
             # 'sift_sig-20-1-5': ['sift_sig_', [20.0,20.0], 2, 'median', 5], # 'bilateral
-            'sift_sig-20-4': ['sift_sig_', [20.0,20.0], 2, 'm_bilateral_thd', 11], # bilateral_thd
+            # 'sift_sig-20-4': ['sift_sig_', [20.0,20.0], 2, 'm_bilateral_thd', 11], # bilateral_thd
+            # 'sift_sig-20-5': ['sift_sig_', [20.0,20.0], 2, 'm_guided_thd', 1], # bilateral_thd
 
             # ## sigma = 25
-            'sift_sig-25-0': ['sift_sig_', [25.0,25.0], 2, 'None', 0],
+            # 'sift_sig-25-0': ['sift_sig_', [25.0,25.0], 2, 'None', 0],
             # 'sift_sig-25-1': ['sift_sig_', [25.0,25.0], 2, 'median', 3], # 'bilateral
             # 'sift_sig-25-2': ['sift_sig_', [25.0,25.0], 2, 'bilateral'], # bilateral
             # 'sift_sig-25-3': ['sift_sig_', [25.0,25.0], 2, 'm_bilateral'], # bilateral
             # 'sift_sig-25-1-5': ['sift_sig_', [25.0,25.0], 2, 'median', 5], # 'bilateral
-            'sift_sig-25-4': ['sift_sig_', [25.0,25.0], 2, 'm_bilateral_thd', 11], # bilateral_thd
+            # 'sift_sig-25-4': ['sift_sig_', [25.0,25.0], 2, 'm_bilateral_thd', 11], # bilateral_thd
+            # 'sift_sig-25-5': ['sift_sig_', [25.0,25.0], 2, 'm_guided_thd', 1], # bilateral_thd
 
         }
 

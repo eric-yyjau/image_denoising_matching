@@ -115,8 +115,10 @@ def dataLoader(config, dataset='syn', warp_input=False, train=True, val=True):
             'train_set': train_set, 'val_set': val_set}
 
 def dataLoader_test(config, dataset='syn', warp_input=False, export_task='train',
-            shuffle=False):
+            shuffle=False, device='cpu'):
     import torchvision.transforms as transforms
+    if device == 'cpu':
+        num_workers = 0
     data_transforms = {
         'test': transforms.Compose([
             transforms.ToTensor(),
@@ -144,7 +146,7 @@ def dataLoader_test(config, dataset='syn', warp_input=False, export_task='train'
         test_loader = torch.utils.data.DataLoader(
             test_set, batch_size=1, shuffle=shuffle,
             pin_memory=True,
-            num_workers=8,
+            num_workers=num_workers,
             worker_init_fn=worker_init_fn
         )
     elif dataset == 'coco':
@@ -157,7 +159,7 @@ def dataLoader_test(config, dataset='syn', warp_input=False, export_task='train'
         test_loader = torch.utils.data.DataLoader(
             test_set, batch_size=1, shuffle=shuffle,
             pin_memory=True,
-            num_workers=8,
+            num_workers=num_workers,
             worker_init_fn=worker_init_fn
         )
     # elif dataset == 'Kitti' or 'Tum':
@@ -173,7 +175,7 @@ def dataLoader_test(config, dataset='syn', warp_input=False, export_task='train'
         test_loader = torch.utils.data.DataLoader(
             test_set, batch_size=1, shuffle=shuffle,
             pin_memory=True,
-            num_workers=8,
+            num_workers=num_workers,
             worker_init_fn=worker_init_fn
 
         )

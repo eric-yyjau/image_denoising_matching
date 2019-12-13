@@ -45,6 +45,7 @@ class Process_image(object):
 #         from models.bilateral import bilateral, median
         from models.single_res_filters import bilateral, median
         from models.multi_bilateral import MultiBilateral
+        from models.multi_guided_est import MultiGuidedEst as m_filter
         d = params['d']
 
         if filter is None: 
@@ -70,6 +71,16 @@ class Process_image(object):
             if len(img.shape) == 2:
                 img = img[..., np.newaxis]
             img = multi_bilateral.denoise(img, d=d, sigmaColor=sigmaColor, sigmaSpace=sigmaSpace)
+            pass
+        elif filter == 'm_guided_thd':
+            the_filter = m_filter(wavelet_type = 'db8', wavelet_levels = 2, 
+                threshold_type = 'BayesShrink', sigma=None, mode='soft')
+            # sigmaColor = params['sigmaColor']
+            sigmaSpace = params['sigmaSpace'] # default 1.8
+            print(f'img: {img.shape}')
+            img_rgb = np.stack([img, img, img]).transpose([1,2,0])
+            img_rgb = the_filter.denoise(img_rgb, d=d, sigmaSpace=sigmaSpace)
+            img = img_rgb[...,0]
             pass
         else:
             logging.warning(f"filter type {filter} not defined")
