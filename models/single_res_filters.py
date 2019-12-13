@@ -10,8 +10,9 @@ OpenCV single resolution filters
 import cv2
 import numpy as np
 from cv2.ximgproc import guidedFilter
+from models.estimate_noise import estimate_noise_fast
 
-def bilateral(img, d=11, sigmaColor=75/255, sigmaSpace=50,
+def bilateral(img, d=11, sigmaColor=None, sigmaSpace=50,
               color_space = 'RGB'):
     '''
     img - (H,W,3) or (H,W,1) intensity float in [0,1] 
@@ -20,6 +21,9 @@ def bilateral(img, d=11, sigmaColor=75/255, sigmaSpace=50,
     sigmaSpace: Filter sigma in the coordinate space
     color_space: Color space to perform filtering
     '''
+    if sigmaColor is None:
+        sigmaColor = estimate_noise_fast(img)
+        
     if color_space == 'YUV':
         img = cv2.cvtColor(np.uint8(img*255), cv2.COLOR_BGR2YUV)
         img_out = cv2.bilateralFilter(img, d, int(sigmaColor*255), sigmaSpace)
@@ -41,8 +45,7 @@ def median(img, d=11, color_space = 'RGB'):
     sigmaColor: Filter sigma in the color space
     sigmaSpace: Filter sigma in the coordinate space
     color_space: Color space to perform filtering
-    '''
-    
+    '''    
     if color_space == 'YUV':
         img = cv2.cvtColor(np.uint8(img*255), cv2.COLOR_BGR2YUV)
         img_out = cv2.bilateralFilter(img, d)
@@ -58,7 +61,7 @@ def median(img, d=11, color_space = 'RGB'):
         return img_out
     
 
-def guided(img, guide, d=11, sigmaColor=75/255, color_space = 'RGB'):
+def guided(img, guide, d=11, sigmaColor=500, color_space = 'RGB'):
     '''
     img - (H,W,3) or (H,W,1) intensity float in [0,1]
     d: Diameter of each pixel neighborhood 
@@ -69,19 +72,20 @@ def guided(img, guide, d=11, sigmaColor=75/255, color_space = 'RGB'):
     
     if color_space == 'YUV':
         img = cv2.cvtColor(np.uint8(img*255), cv2.COLOR_BGR2YUV)
-        img_out = guidedFilter(guide, img, radius=d,eps=sigmaColor*255)
+        img_out = guidedFilter(guide, img, radius=d,eps=sigmaColor,dDepth=-1)
         img_out = np.float32(cv2.cvtColor(img_out, cv2.COLOR_YUV2BGR))/255.
         return img_out
     elif color_space == 'LAB':
         img = cv2.cvtColor(np.uint8(img*255), cv2.COLOR_BGR2LAB)
-        img_out = guidedFilter(guide, img, radius=d,eps=sigmaColor*255)
+        img_out = guidedFilter(guide, img, radius=d,eps=sigmaColor,dDepth=-1)
         img_out = np.float32(cv2.cvtColor(img_out, cv2.COLOR_LAB2BGR))/255.
         return img_out
     else:
         img_out = np.float32(guidedFilter(np.uint8(guide*255),
                                           np.uint8(img*255),
                                           radius=d,
-                                          eps=sigmaColor*255))/255
+                                          eps=sigmaColor,
+                                          dDepth=-1))/255
         return img_out
 
 #%%
