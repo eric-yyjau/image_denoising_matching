@@ -14,10 +14,10 @@ https://docs.google.com/document/d/1VCM1yOlSXhzatvEgNLB1IoWqT81NWjPtbGr0THJ5uqE/
 
 ## Run the code
 ### 1) Denoising performance on SIDD
-download SIDD small sRGB from ftp://sidd_user:sidd_2018@130.63.97.225/SIDD_Small_sRGB_Only.zip
-run 'demo_filters.py' to see result on one patch
-run 'tune_filters_sidd.py' to tune parameters on 40 images
-run 'test_filters_sidd.py' to test filters on SIDD
+- download SIDD small sRGB from ftp://sidd_user:sidd_2018@130.63.97.225/SIDD_Small_sRGB_Only.zip
+- run 'demo_filters.py' to see result on one patch
+- run 'tune_filters_sidd.py' to tune parameters on 40 images
+- run 'test_filters_sidd.py' to test filters on SIDD
 
 
 ### 2) Export and Evaluate repeatability on SIFT
