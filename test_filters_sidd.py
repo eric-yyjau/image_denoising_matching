@@ -41,8 +41,10 @@ multi_guided = MultiGuidedEst(wavelet_type = 'db4', wavelet_levels = 2,
 #PSNR_before, SSIM_before, MSE_before = 0, 0, 0
 PSNR, SSIM, MSE = [],[],[]
 
-random_per = np.random.permutation(len(foldernames)).tolist()
-for idx, name in enumerate([foldernames[i] for i in random_per[:40]]):
+#random_per = np.random.permutation(len(foldernames)).tolist()
+#for idx, name in enumerate([foldernames[i] for i in random_per]):
+
+for idx, name in enumerate(foldernames):
     img = np.float64(cv2.imread(os.path.join(path,name,'NOISY_SRGB_010.PNG')))/255.
     img_gt = np.float64(cv2.imread(os.path.join(path,name,'GT_SRGB_010.PNG')))/255. 
     

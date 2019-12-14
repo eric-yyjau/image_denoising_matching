@@ -32,7 +32,7 @@ multi_bilateral = MultiBilateralEst(wavelet_type = 'db4', wavelet_levels = 2,
                  threshold_type = 'BayesShrink', sigma=None, mode='soft')
 multi_bilateral_nothres = MultiBilateralEst(wavelet_type = 'db4', wavelet_levels = 2, 
                  threshold_type = 'None', sigma=None, mode='soft')
-multi_guided = MultiGuidedEst(wavelet_type = 'db8', wavelet_levels = 2, 
+multi_guided = MultiGuidedEst(wavelet_type = 'db4', wavelet_levels = 2, 
                  threshold_type = 'BayesShrink', sigma=None, mode='soft')
 #
 img_gd = guided(img,img, 3, 1000)

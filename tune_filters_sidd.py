@@ -33,7 +33,7 @@ for wavelet_levels in [1,2,3,4]:
         ''' Test in dataset '''
         PSNR, SSIM, MSE = [],[],[]
         
-        for idx, name in enumerate([foldernames[i] for i in random_per[:30]]):
+        for idx, name in enumerate([foldernames[i] for i in random_per[:40]]):
             img = np.float64(cv2.imread(os.path.join(path,name,'NOISY_SRGB_010.PNG')))/255.
             img_gt = np.float64(cv2.imread(os.path.join(path,name,'GT_SRGB_010.PNG')))/255. 
             
