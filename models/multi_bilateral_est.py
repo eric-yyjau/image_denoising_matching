@@ -116,9 +116,9 @@ class MultiBilateralEst():
             # --- denoise LP with bilateral
             LP_bilateral = np.zeros_like(LP)
             for i in range(LP.shape[0]):
-                s = 2*estimate_noise_fast(LP[i])
+                s = estimate_noise_fast(LP[i])
                 LP_bilateral[i] = cv2.bilateralFilter(np.float32(LP[i]), 
-                            d, s, sigmaSpace)
+                            d, s*2, sigmaSpace)
                                 
 #            # --- denoise HP with thresholding
             level = dcoeffs[l]

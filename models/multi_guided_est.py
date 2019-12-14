@@ -19,7 +19,7 @@ import numpy as np
 import pywt
 import scipy
 
-#from models.single_res_filters import guided
+from models.single_res_filters import guided
 from models.guided import GuidedFilter, GrayGuidedFilter, MultiDimGuidedFilter
 
 from skimage.restoration import (denoise_bilateral, estimate_sigma)
@@ -85,6 +85,18 @@ def _sigma_est_dwt(detail_coeffs, distribution='Gaussian'):
                          "supported")
     return sigma
 
+
+#%%
+def flt2norm(img_flt):
+    imax = img_flt.max()
+    imin = img_flt.min()
+    img_norm = (img_flt-imin)/(imax-imin)
+    return img_norm, imin, imax
+
+
+def norm2flt(img_norm, imin, imax):
+    return img_norm*(imax-imin) + imin
+
 #%%
 class MultiGuidedEst():
     """
@@ -107,7 +119,7 @@ class MultiGuidedEst():
         self.mode = mode
         
 
-    def denoise(self, img, d=11, sigmaSpace=1.8):
+    def denoise(self, img, d=3):
         # channel first
         img = img.transpose(2,0,1)
         # --- wavelet transform
@@ -126,11 +138,14 @@ class MultiGuidedEst():
             # --- denoise LP with bilateral
             LP_filter = np.zeros_like(LP)
             for i in range(LP.shape[0]):
-#                s = estimate_noise_fast(LP[i])
-#                GF = GrayGuidedFilter(LP[i], radius=3, eps=1e-6)
-                GF = GrayGuidedFilter(LP[i], radius=d, eps=1e-4)                
-                LP_filter[i] = GF.filter(LP[i])
-#                LP_filter[i] = guided(LP[i], LP[i], d=11, sigmaColor=250, color_space = 'RGB')
+                s = 2*estimate_noise_fast(LP[i])
+#                GF = GrayGuidedFilter(LP[i], radius=d, eps=1e-6)
+#                GF = GrayGuidedFilter(LP[i], radius=d, eps=1e-4)                
+#                LP_filter[i] = GF.filter(LP[i])
+                im, imin, imax = flt2norm(LP[i])
+                im_out = guided(im, im, d=d, sigmaColor=(s**2)*255*255, color_space = 'RGB')
+#                im_out = guided(im, im, d=d, sigmaColor=1e-6*255*255, color_space = 'RGB')
+                LP_filter[i] = norm2flt(im_out, imin, imax)
                                 
 #            # --- denoise HP with thresholding
             level = dcoeffs[l]
@@ -148,10 +163,14 @@ class MultiGuidedEst():
         # channel last
         img_out = LP.transpose(1,2,0)
 #        sigmaColor = estimate_noise_fast(img_out)
-#        img_out = guided(img_out, img_out, d=11, sigmaColor=500, color_space = 'RGB')
-#        GF = MultiDimGuidedFilter(img_out, radius=3, eps=1e-5) 
-        GF = MultiDimGuidedFilter(img_out, radius=d, eps=2500/255/255)                
-        img_out = GF.filter(img_out)
+        im, imin, imax = flt2norm(img_out)
+        im_out = guided(im, im, d=d, sigmaColor=2500, color_space = 'RGB')
+#        im_out = guided(im, im, d=d, sigmaColor=1e-5*255*255, color_space = 'RGB')
+        img_out = norm2flt(im_out, imin, imax)
+        
+#        GF = MultiDimGuidedFilter(img_out, radius=d, eps=1e-5) 
+#        GF = MultiDimGuidedFilter(img_out, radius=d, eps=2500/255/255)                
+#        img_out = GF.filter(img_out)
         
         return img_out
                 
