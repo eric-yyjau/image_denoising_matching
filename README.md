@@ -12,3 +12,28 @@ https://docs.google.com/document/d/1VCM1yOlSXhzatvEgNLB1IoWqT81NWjPtbGr0THJ5uqE/
 - 12/9 final presentation
 - 12/14 final report
 
+## Run the code
+
+
+### 6) Export and Evaluate repeatability on SIFT
+#### Export
+```
+python export_classical.py export_descriptor configs/classical_descriptors.yaml sift_test
+```
+#### evaluate
+```
+python evaluation.py <path to npz files> [-r, --repeatibility | -o, --outputImg | -homo, --homography ]
+python evaluation.py logs/sift_test/predictions -r -o
+```
+- specify the pretrained model
+
+### Run tensorboard
+```
+tensorboard --logdir=runs/[ train_base | train_joint ]
+```
+
+### Current best model
+```
+logs/superpoint_coco30_1/checkpoints/superPointNet_170000_checkpoint.pth.tar
+```
+
