@@ -40,7 +40,11 @@ class Process_image(object):
         """
         input: 
             img: np.float[H, W, ..] (from 0 to 1)
-
+            filter:
+                'None': return original image
+                'median': median filter
+                'm_bilateral': multi-resolution bilateral filter
+                'm_guided_thd': multi-resolution guided filter
         """
 #         from models.bilateral import bilateral, median
         from models.single_res_filters import bilateral, median

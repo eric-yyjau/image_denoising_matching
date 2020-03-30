@@ -1,0 +1,33 @@
+data:
+  alteration: all
+  augmentation:
+    photometric:
+      enable: true # set to False if no noise
+      params:
+        additive_gaussian_noise: # define the random noise sigmal
+          stddev_range:
+          - 10.0
+          - 10.0
+      primitives:
+      - additive_gaussian_noise
+  cache_in_memory: false
+  dataset: hpatches
+  name: patches_dataset
+  preprocessing:
+    resize:
+    - 480
+    - 640
+  shuffle: true
+eval_iter: 600
+model:
+  batch_size: 1
+  filter: m_bilateral # set the type of filters: ['median', 'm_bilateral', 'm_guided_thd']
+  filter_d: 11 # window size
+  method: sift
+  name: classical_detectors_descriptors
+  nms: 4
+  top_k: 1000
+seed: 1 # set the seed to ensure the same random noise
+training:
+  reproduce: true
+  val_batches: 2  # set how many samples do you want

@@ -117,6 +117,7 @@ def dataLoader(config, dataset='syn', warp_input=False, train=True, val=True):
 def dataLoader_test(config, dataset='syn', warp_input=False, export_task='train',
             shuffle=False, device='cpu'):
     import torchvision.transforms as transforms
+    num_workers = 1
     if device == 'cpu':
         num_workers = 0
     data_transforms = {

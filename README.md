@@ -15,25 +15,47 @@ https://docs.google.com/document/d/1VCM1yOlSXhzatvEgNLB1IoWqT81NWjPtbGr0THJ5uqE/
 ## Run the code
 
 
-### 6) Export and Evaluate repeatability on SIFT
+### 2) Export and Evaluate repeatability on SIFT
+#### Requirements
+- GPU
+  - need a gpu to run (not work on pure cpu version)
+
+#### Datasets
+- HPatches
+    - [HPatches link](http://icvl.ee.ic.ac.uk/vbalnt/hpatches/hpatches-sequences-release.tar.gz)
+    - Please put the dataset under `datasets/`.
+
 #### Export
+- set `config` file.
 ```
-python export_classical.py export_descriptor configs/classical_descriptors.yaml sift_test
+python export_classical.py export_descriptor configs/example_config.yaml sift_test_small
 ```
 #### evaluate
 ```
 python evaluation.py <path to npz files> [-r, --repeatibility | -o, --outputImg | -homo, --homography ]
-python evaluation.py logs/sift_test/predictions -r -o
+python evaluation.py logs/sift_test_small/predictions -r -homo
 ```
-- specify the pretrained model
+<!-- - specify the pretrained model -->
 
-### Run tensorboard
+#### Run evaluation for different noise
 ```
-tensorboard --logdir=runs/[ train_base | train_joint ]
+# check help 
+python run_eval_good.py -h
+```
+- Change the parameters from `sequence_info.get_sequences`.
+  - set `['exp_name', 'param', mode, 'filter', filter_d]`.
+- Run for collecting samples
+```
+python run_eval_good.py test_0330 --dataset hpatches --model sift --runEval
+```
+- Check output and check exist
+```
+python run_eval_good.py test_0330 --dataset hpatches --model sift -co -ce
 ```
 
-### Current best model
-```
-logs/superpoint_coco30_1/checkpoints/superPointNet_170000_checkpoint.pth.tar
-```
+
+
+#### Results
+
+
 
