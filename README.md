@@ -19,6 +19,11 @@ https://docs.google.com/document/d/1VCM1yOlSXhzatvEgNLB1IoWqT81NWjPtbGr0THJ5uqE/
 #### Requirements
 - GPU
   - need a gpu to run (not work on pure cpu version)
+- Environments
+  - python 3.6, pytorch >= 0.4.1
+```
+conda env create -f environment.yml # env name: py36-imgden
+```
 
 #### Datasets
 - HPatches
@@ -36,6 +41,11 @@ python evaluation.py <path to npz files> [-r, --repeatibility | -o, --outputImg 
 python evaluation.py logs/sift_test_small/predictions -r -homo
 ```
 <!-- - specify the pretrained model -->
+#### Run scripts
+- Do export, then evaluate the prediction.
+```
+./run_export.sh
+```
 
 #### Run evaluation for different noise
 ```
@@ -52,8 +62,6 @@ python run_eval_good.py test_0330 --dataset hpatches --model sift --runEval
 ```
 python run_eval_good.py test_0330 --dataset hpatches --model sift -co -ce
 ```
-
-
 
 #### Results
 

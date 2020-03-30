@@ -1,3 +1,4 @@
+### base config file
 data:
     name: 'patches_dataset'
     dataset: 'hpatches'  # 'hpatches' 'coco'

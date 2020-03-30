@@ -1,4 +1,4 @@
-name: py36-torch
+name: py36-imgden
 channels:
   - defaults
 dependencies:

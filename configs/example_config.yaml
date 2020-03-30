@@ -30,4 +30,4 @@ model:
 seed: 1 # set the seed to ensure the same random noise
 training:
   reproduce: true
-  val_batches: 2  # set how many samples do you want
+  val_batches: 2  # set how many samples do you want, or `-1` to export all
