@@ -1,3 +1,10 @@
+"""Script for exporting prediction
+This is the exporting script for image denoising project.
+
+Author: You-Yi Jau, Yiqian Wang
+Date: 2020/03/30
+"""
+
 import argparse
 import time
 import csv
@@ -92,33 +99,11 @@ def export_descriptor(config, output_dir, args):
         ):  ##### check: how to limit the validation
             break
         img_0, img_1 = sample['image'], sample['warped_image']
-
-
-        # def filter_before_matching(img, filter=None):
-        #     """
-        #     input: 
-        #         img: np.float[H, W, ..] (from 0 to 1)
-
-        #     """
-        #     from models.bilateral import bilateral
-        #     if filter is None: 
-        #         return img
-        #     elif filter == 'bilateral':
-        #         logging.info(f"using {filter} filter")
-        #         d = 0  # use the settings for all noise levels
-        #         sigmaColor = 75
-        #         sigmaSpace = 75                
-        #         img = bilateral(np.float32(img), d, sigmaColor/255, sigmaSpace)
-
-        #     return img
         
-        
-        # img = img_0.numpy().squeeze()
-        # first image, no matches
+        # put filters or 'None' to the images
         imgs_np, imgs_fil = [], []
         img = img_0.numpy().squeeze()
         imgs_np.append(img)
-        # img = filter_before_matching(img, filter=config['model']['filter'])
         sigma_n = config['data']['augmentation']['photometric']['params']['additive_gaussian_noise']['stddev_range'][0]
         filter_d = config['model'].get('filter_d', 11)
         bilateral_params = img_processor.get_bilateral_params(sigma_n, filter_d)
@@ -136,6 +121,9 @@ def export_descriptor(config, output_dir, args):
 
         ##### add opencv functions here #####
         def classicalDetectors(image, method='sift'):
+            """
+            # sift keyframe detectors and descriptors
+            """
             image = image*255
             round_method = False
             if round_method == True:
@@ -210,7 +198,6 @@ def export_descriptor(config, output_dir, args):
             'warped_desc': np (N2, 256)
             'homography': np (3,3)
             'matches': np (N3, 4)
-
         '''
 
         # save data

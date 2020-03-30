@@ -1,3 +1,10 @@
+"""Script for evaluation
+This is the evaluation script for image denoising project.
+
+Author: You-Yi Jau, Yiqian Wang
+Date: 2020/03/30
+"""
+
 import matplotlib
 matplotlib.use('Agg') # solve error of tk
 
