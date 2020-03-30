@@ -1,5 +1,5 @@
-# ECE251C project: image_denoising_matching
-https://docs.google.com/document/d/1VCM1yOlSXhzatvEgNLB1IoWqT81NWjPtbGr0THJ5uqE/edit#heading=h.nrpj9v3j7ji7
+# Feature-preserving image denoising with multiresolution filters
+Final project for ECE251C: Filter banks and wavelets
 
 ## Summary
 - Study and implement the bilateral filter, multiresolution bilateral filter, guided filter.
@@ -89,3 +89,9 @@ Please refer to `final_report.pdf` and `presentation.pdf`.
 ![Matching](./data/sift_results/0.png)
   - warping using predicted homography
 ![Matching](./data/sift_results/0_warp.png)
+
+## Logging
+https://docs.google.com/document/d/1VCM1yOlSXhzatvEgNLB1IoWqT81NWjPtbGr0THJ5uqE/edit#heading=h.nrpj9v3j7ji7
+
+# Credits
+This implementation is developed by [Yigian Wang](https://github.com/yiqian-wang) and [You-Yi Jau](https://github.com/eric-yyjau).
