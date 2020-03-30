@@ -23,10 +23,10 @@ def PSNR_self(img1, img2):
     input: img intensity between [0,1] 
     output: psnr between [0,1], the higher the better
     '''
-    mse = ( (img1 - img2) ** 2 ).mean()
+    mse = ( (np.uint8(img1*255) - np.uint8(img2*255)) ** 2 ).mean()
     if mse == 0:
         return 100
-    PIXEL_MAX = 1.0
+    PIXEL_MAX = 255
     return 20 * np.log10(PIXEL_MAX / np.sqrt(mse))
 
 def SSIM(img1, img2):

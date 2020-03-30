@@ -27,12 +27,12 @@ foldernames = walk[0][1]
 #img_gt = np.float64(cv2.imread('data/GT_SRGB_010_patch.png'))/255.
 
 ''' Define filters '''
-multi_bilateral = MultiBilateralEst(wavelet_type = 'db8', wavelet_levels = 3, 
-                 threshold_type = 'BayesShrink', sigma=None, mode='soft')
+#multi_bilateral = MultiBilateralEst(wavelet_type = 'db4', wavelet_levels = 2, 
+#                 threshold_type = 'BayesShrink', sigma=None, mode='soft')
 #multi_bilateral_nothres = MultiBilateralEst(wavelet_type = 'db8', wavelet_levels = 2, 
 #                 threshold_type = 'None', sigma=None, mode='soft')
-#multi_guided = MultiGuidedEst(wavelet_type = 'db8', wavelet_levels = 2, 
-#                 threshold_type = 'BayesShrink', sigma=None, mode='soft')
+multi_guided = MultiGuidedEst(wavelet_type = 'db4', wavelet_levels = 2, 
+                 threshold_type = 'BayesShrink', sigma=None, mode='soft')
 
 #img_dn = multi_bilateral.denoise(img)
 
@@ -42,19 +42,21 @@ multi_bilateral = MultiBilateralEst(wavelet_type = 'db8', wavelet_levels = 3,
 PSNR, SSIM, MSE = [],[],[]
 
 #random_per = np.random.permutation(len(foldernames)).tolist()
-random_per = np.random.permutation(len(foldernames))[:40].tolist()
-for idx, name in enumerate([foldernames[i] for i in random_per]):
+#for idx, name in enumerate([foldernames[i] for i in random_per]):
+
+for idx, name in enumerate(foldernames):
     img = np.float64(cv2.imread(os.path.join(path,name,'NOISY_SRGB_010.PNG')))/255.
     img_gt = np.float64(cv2.imread(os.path.join(path,name,'GT_SRGB_010.PNG')))/255. 
     
 #    img_dn = guided(img,img, 25, 2500)
 #    img_dn = bilateral(img, 25, 50/255, 1.8)
 #    img_dn = median(img, d=25)
-    img_dn = multi_bilateral.denoise(img, d=11, sigmaSpace=1.8)
+#    img_dn = multi_bilateral.denoise(img, d=5, sigmaSpace=1.8)
+#    img_dn = multi_bilateral.denoise(img, d=11, sigmaSpace=1.8)
 #    img_dn = multi_bilateral_nothres.denoise(img, d=11, sigmaSpace=1.8)
 #    img_dn = denoise_wavelet(img, multichannel=True, convert2ycbcr=False,
 #                           method='BayesShrink', mode='soft')
-#    img_dn = multi_guided.denoise(img, d=3, sigmaSpace=1.8)
+    img_dn = multi_guided.denoise(img, d=3)
     
 #    p, s, m = denoise_eval(img_gt, img, print_result =False)
     psnr, ssim, mse = denoise_eval(img_gt, img_dn, print_result =False)
