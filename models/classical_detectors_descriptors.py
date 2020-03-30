@@ -1,4 +1,3 @@
-import tensorflow as tf
 import numpy as np
 import cv2
 
@@ -64,44 +63,3 @@ def SIFT_det(img, img_rgb, visualize=False, nfeatures=2000):
     # return x_all, kp, des
 
     return x_all, des
-
-'''
-class ClassicalDetectorsDescriptors(BaseModel):
-    input_spec = {
-            'image': {'shape': [None, None, None, 1], 'type': tf.float32}
-    }
-    default_config = {
-            'method': 'sift',  # 'orb'
-            'threshold': 0.5,
-            'nms': 4,
-            'top_k': 300,
-    }
-    trainable = False
-
-    def _model(self, inputs, mode, **config):
-        im = inputs['image']
-        with tf.device('/cpu:0'):
-            keypoints, descriptors = tf.map_fn(lambda i: tf.py_func(
-                lambda x: classical_detector_descriptor(x, **config),
-                [i],
-                (tf.float32, tf.float32)),
-                                               im, [tf.float32, tf.float32])
-            prob = keypoints
-            prob_nms = prob
-            if config['nms']:
-                prob_nms = tf.map_fn(lambda p: box_nms(p, config['nms'], min_prob=0.,
-                                                       keep_top_k=config['top_k']), prob)
-        pred = tf.cast(tf.greater_equal(prob_nms, config['threshold']), tf.int32)
-        keypoints = {'prob': prob, 'prob_nms': prob_nms, 'pred': pred}
-        return {**keypoints, 'descriptors': descriptors}
-
-    def _loss(self, outputs, inputs, **config):
-        raise NotImplementedError
-
-    def _metrics(self, outputs, inputs, **config):
-        pred = outputs['pred']
-        labels = inputs['keypoint_map']
-        precision = tf.reduce_sum(pred*labels) / tf.reduce_sum(pred)
-        recall = tf.reduce_sum(pred*labels) / tf.reduce_sum(labels)
-        return {'precision': precision, 'recall': recall}
-'''

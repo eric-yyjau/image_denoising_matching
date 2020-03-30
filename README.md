@@ -26,8 +26,15 @@ https://docs.google.com/document/d/1VCM1yOlSXhzatvEgNLB1IoWqT81NWjPtbGr0THJ5uqE/
   - need a gpu to run (not work on pure cpu version)
 - Environments
   - python 3.6, pytorch >= 0.4.1
+  - conda create
 ```
-conda env create -f environment.yml # env name: py36-imgden
+conda env create -f environment.yml # env name: py36-imgdn
+```
+  - use pip 
+```
+conda create --name py36-imgdn python=3.6
+conda activate py36-imgdn
+pip install -r requirements.txt
 ```
 
 #### Datasets
