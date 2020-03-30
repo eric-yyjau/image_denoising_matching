@@ -76,4 +76,11 @@ python run_eval_good.py test_0330 --dataset hpatches --model sift -co -ce
 ```
 
 #### Results
-Please refer to `final_report.pdf`.
+Please refer to `final_report.pdf` and `presentation.pdf`.
+- sift results
+  - matching
+![Matching](./data/sift_results/0m.png)
+  - repeatability
+![Matching](./data/sift_results/0.png)
+  - warping using predicted homography
+![Matching](./data/sift_results/0_warp.png)
