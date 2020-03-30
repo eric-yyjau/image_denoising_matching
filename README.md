@@ -1,5 +1,6 @@
 # Feature-preserving image denoising with multiresolution filters
-Final project for ECE251C: Filter banks and wavelets
+Final project for ECE251C: Filter banks and wavelets.
+
 [The Paper](https://github.com/eric-yyjau/image_denoising_matching/blob/master/final_report.pdf)
 
 ## Summary
